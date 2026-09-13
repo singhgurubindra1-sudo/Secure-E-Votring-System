@@ -1,5 +1,7 @@
 [
-  { "slNo": 1, "name": "Arnab Baruah",   "voterId": "ASM1234567", "state": "Assam", "district": "Kamrup Metropolitan", "dob": "1994-03-17" },
-  { "slNo": 2, "name": "Priyanka Gogoi", "voterId": "ASM1234568", "state": "Assam", "district": "Jorhat",              "dob": "1988-11-02" },
-  { "slNo": 3, "name": "Imran Hussain",  "voterId": "ASM1234569", "state": "Assam", "district": "Nagaon",              "dob": "2001-07-25" }
+  { "slNo": 1, "name": "Arnab Baruah",     "voterId": "ASM1234567", "state": "Assam",  "district": "Kamrup Metropolitan", "dob": "1994-03-17" },
+  { "slNo": 2, "name": "Priyanka Gogoi",   "voterId": "ASM1234568", "state": "Assam",  "district": "Jorhat",              "dob": "1988-11-02" },
+  { "slNo": 3, "name": "Imran Hussain",    "voterId": "ASM1234569", "state": "Assam",  "district": "Nagaon",              "dob": "2001-07-25" },
+  { "slNo": 4, "name": "Gurubinder Singh", "voterId": "PNB4521907", "state": "Punjab", "district": "Ludhiana",            "dob": "2005-04-04" },
+  { "slNo": 5, "name": "Shristi Kumari",   "voterId": "BHR7830256", "state": "Bihar",  "district": "Patna",               "dob": "2005-08-12" }
 ]
