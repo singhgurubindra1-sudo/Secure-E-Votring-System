@@ -6,6 +6,8 @@ const rateLimit = require('express-rate-limit');
 const { findByVoterId } = require('./voters');
 const { requireAuth } = require('../middleware/auth');
 const { streamVoterCard } = require('../utils/voterCardPdf');
+const faces = require('../utils/faceTemplates');
+const faceToken = require('../utils/faceToken');
 const { normalizeName, normalizeDob, clean } = require('../utils/validate');
 
 const router = express.Router();
@@ -50,7 +52,14 @@ router.post('/verify', limiter, async (req, res, next) => {
   try {
     const result = await verify(req.body);
     if (result.error) return res.status(404).json({ ok: false, ...result });
-    res.json({ ok: true, voter: result.voter });
+
+    const enrolled = await faces.isEnrolled(result.voter.voterId);
+    res.json({
+      ok: true,
+      voter: result.voter,
+      faceRequired: enrolled || faces.enforcement() === 'all',
+      faceEnrolled: enrolled,
+    });
   } catch (err) {
     next(err);
   }
@@ -62,11 +71,37 @@ router.post('/download', limiter, async (req, res, next) => {
     const result = await verify(req.body);
     if (result.error) return res.status(404).json({ ok: false, ...result });
 
-    const fileName = `voter-card-${result.voter.voterId}.pdf`;
+    const { voter } = result;
+
+    // A voter with a face on file must prove it on camera every download. When
+    // enforcement is "all", a voter with no face on file cannot download at all.
+    const enrolled = await faces.isEnrolled(voter.voterId);
+    if (enrolled || faces.enforcement() === 'all') {
+      if (!enrolled) {
+        return res.status(403).json({
+          ok: false,
+          faceRequired: true,
+          faceEnrolled: false,
+          error: 'This voter has no face on file. Enrol a photograph before downloading a card.',
+        });
+      }
+      if (!faceToken.verify(req.body.faceToken, voter.voterId, 'card')) {
+        return res.status(401).json({
+          ok: false,
+          faceRequired: true,
+          faceEnrolled: true,
+          error: 'Face verification is needed before the card can be downloaded.',
+        });
+      }
+    }
+
+    const photo = await faces.readPhoto(voter.voterId);
+
+    const fileName = `voter-card-${voter.voterId}.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     res.setHeader('Cache-Control', 'no-store');
-    streamVoterCard(result.voter, res);
+    streamVoterCard(voter, res, { photo });
   } catch (err) {
     next(err);
   }

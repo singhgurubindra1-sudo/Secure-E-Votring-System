@@ -27,7 +27,11 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
+        // 'wasm-unsafe-eval' lets TensorFlow.js compile its WASM kernels for
+        // face matching. It does not permit eval() of JavaScript.
+        scriptSrc: ["'self'", "'wasm-unsafe-eval'"],
+        workerSrc: ["'self'", 'blob:'],
+        mediaSrc: ["'self'", 'blob:'],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
         imgSrc: ["'self'", 'data:', 'blob:'],
@@ -43,6 +47,7 @@ app.use(
   })
 );
 
+app.use('/api/face/enrol', express.json({ limit: '8mb' }));
 app.use(express.json({ limit: '256kb' }));
 app.use(express.urlencoded({ extended: false, limit: '256kb' }));
 app.use(cookieParser());
@@ -61,10 +66,18 @@ app.use('/api/voters', require('./routes/voters'));
 app.use('/api/card', require('./routes/card'));
 app.use('/api/vote', require('./routes/vote'));
 app.use('/api/tickets', require('./routes/tickets'));
+app.use('/api/face', require('./routes/face'));
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, service: 'e-voting', time: new Date().toISOString() });
 });
+
+// ------------------------------------------------------- Face matching assets
+const FACE_API_DIR = path.join(__dirname, 'node_modules', '@vladmandic', 'face-api');
+const oneDay = { maxAge: '1d', immutable: false };
+
+app.use('/vendor/face-api', express.static(path.join(FACE_API_DIR, 'dist'), oneDay));
+app.use('/models', express.static(path.join(FACE_API_DIR, 'model'), oneDay));
 
 // -------------------------------------------------------------------- Pages
 const page = (file) => path.join(PUBLIC_DIR, file);
@@ -80,6 +93,7 @@ const protectedPages = {
   '/voter-card': 'voter-card.html',
   '/e-vote': 'e-vote.html',
   '/raise-ticket': 'raise-ticket.html',
+  '/enrol-face': 'enrol-face.html',
 };
 
 Object.entries(protectedPages).forEach(([route, file]) => {

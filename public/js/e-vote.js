@@ -1,4 +1,5 @@
 import { $, $$, api, busy, mountSession, escapeHtml, setFieldError, clearFieldErrors, toast } from './app.js';
+import { runFaceCheck } from './face-gate.js';
 
 mountSession();
 
@@ -14,11 +15,13 @@ const ballotDialog = $('#ballotDialog');
 const ballotBody = $('#ballotBody');
 const castButton = $('#castVote');
 
+const faceNotice = $('#faceNotice');
 const receiptDialog = $('#receiptDialog');
 const receiptBody = $('#receiptBody');
 
 let current = null;      // the looked-up voter
 let selectedId = null;   // chosen candidate
+let faceRequired = false; // whether this voter has a face on file
 
 $$('[data-close]').forEach((button) => {
   button.addEventListener('click', () => button.closest('dialog').close());
@@ -42,6 +45,7 @@ form.addEventListener('submit', async (event) => {
   try {
     const data = await api('/api/vote/lookup', { method: 'POST', body: { voterId } });
     current = data;
+    faceRequired = Boolean(data.faceRequired);
 
     credsBody.innerHTML = rows([
       ['Name', escapeHtml(data.voter.name)],
@@ -59,6 +63,8 @@ form.addEventListener('submit', async (event) => {
     credsWarning.hidden = !warning;
     toBallot.disabled = Boolean(warning);
     toBallot.textContent = warning ? 'Ballot unavailable' : 'Yes, continue to ballot';
+
+    faceNotice.hidden = Boolean(warning) || !faceRequired;
 
     credsDialog.showModal();
   } catch (err) {
@@ -110,12 +116,23 @@ ballotBody.addEventListener('change', (event) => {
 /** Step 3: cast the vote and show the receipt. */
 castButton.addEventListener('click', async () => {
   if (!selectedId) return;
+
+  let faceToken = null;
+  if (faceRequired) {
+    try {
+      faceToken = await runFaceCheck({ voterId: current.voter.voterId, purpose: 'ballot' });
+    } catch (err) {
+      toast(err.message, 'bad');
+      return;
+    }
+  }
+
   const restore = busy(castButton, 'Sealing ballot');
 
   try {
     const data = await api('/api/vote/cast', {
       method: 'POST',
-      body: { voterId: current.voter.voterId, candidateId: selectedId },
+      body: { voterId: current.voter.voterId, candidateId: selectedId, faceToken },
     });
 
     receiptBody.innerHTML = rows([
@@ -129,6 +146,7 @@ castButton.addEventListener('click', async () => {
     receiptDialog.showModal();
     form.reset();
     current = null;
+    faceRequired = false;
   } catch (err) {
     toast(err.message, 'bad');
     restore();

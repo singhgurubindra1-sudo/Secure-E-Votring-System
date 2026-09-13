@@ -453,3 +453,110 @@ dialog::backdrop { background: rgba(20, 27, 45, .52); backdrop-filter: blur(2px)
   .creds div { grid-template-columns: 1fr; gap: 2px; }
   .dialog__foot .btn { flex: 1; }
 }
+
+/* ============================================================================
+   Face verification
+   The camera frame is deliberately plain: a dark stage so the video carries the
+   panel, with one status line under it that changes colour by state.
+   ========================================================================== */
+
+.facecheck { display: grid; gap: 14px; }
+
+.facecheck__stage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  max-width: 100%;
+  background: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.facecheck__video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Mirrored, so moving left on screen matches moving left in the room. */
+  transform: scaleX(-1);
+  background: var(--ink);
+}
+
+/* A guide the voter can line their face up inside. */
+.facecheck__reticle {
+  position: absolute;
+  inset: 12% 24%;
+  border: 2px dashed rgba(255, 255, 255, .38);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: border-color .2s ease;
+}
+
+.facecheck[data-state="holding"] .facecheck__reticle { border-color: rgba(255, 214, 102, .85); }
+.facecheck[data-state="reading"] .facecheck__reticle,
+.facecheck[data-state="matched"] .facecheck__reticle { border-color: rgba(126, 217, 172, .9); border-style: solid; }
+.facecheck[data-state="aborted"] .facecheck__reticle,
+.facecheck[data-state="failed"] .facecheck__reticle { border-color: rgba(255, 138, 128, .9); border-style: solid; }
+
+.facecheck__status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 22px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.facecheck__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--line);
+  flex: none;
+}
+
+.facecheck[data-state="loading"] .facecheck__dot,
+.facecheck[data-state="camera"] .facecheck__dot { background: var(--muted); }
+.facecheck[data-state="ready"] .facecheck__dot,
+.facecheck[data-state="searching"] .facecheck__dot { background: var(--violet); }
+.facecheck[data-state="holding"] .facecheck__dot { background: #b8860b; }
+.facecheck[data-state="reading"] .facecheck__dot,
+.facecheck[data-state="matched"] .facecheck__dot { background: var(--verify); }
+.facecheck[data-state="aborted"] .facecheck__dot,
+.facecheck[data-state="failed"] .facecheck__dot { background: var(--alert); }
+
+.facecheck[data-state="matched"] .facecheck__status { color: var(--verify); font-weight: 500; }
+.facecheck[data-state="aborted"] .facecheck__status,
+.facecheck[data-state="failed"] .facecheck__status { color: var(--alert); font-weight: 500; }
+
+.facecheck__hint { font-size: 12.5px; color: var(--muted); }
+
+/* Enrolment page: the photographs staged before they are sent. */
+.enrol__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.enrol__card {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.enrol__card img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--paper); }
+
+.enrol__card figcaption {
+  padding: 7px 9px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  border-top: 1px solid var(--line-soft);
+}
+
+.enrol__card--ok figcaption { color: var(--verify); }
+.enrol__card--bad figcaption { color: var(--alert); }
+
+@media (max-width: 560px) {
+  .facecheck__reticle { inset: 10% 18%; }
+}

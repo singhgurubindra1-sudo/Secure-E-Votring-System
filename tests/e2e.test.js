@@ -186,7 +186,7 @@ test('voter card and ticket flows over HTTP', async (t) => {
   });
 
   await t.test('does not persist the absolute disk path of an attachment', async () => {
-    const stored = JSON.parse(await fs.readFile(path.join(ROOT, 'data', 'tickets.json'), 'utf8'));
+    const stored = JSON.parse(await fs.readFile(path.join(server.dataDir, 'tickets.json'), 'utf8'));
     const saved = stored.find((x) => x.reference === reference);
     assert.ok(saved);
     assert.equal(saved.attachments[0].storedPath, undefined);

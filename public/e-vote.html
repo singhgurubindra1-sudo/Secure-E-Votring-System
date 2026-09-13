@@ -66,6 +66,7 @@
   <div class="dialog__body">
     <div class="creds" id="credsBody"></div>
     <div class="notice notice--bad" id="credsWarning" hidden style="margin-top:16px"></div>
+    <div class="notice notice--info" id="faceNotice" hidden style="margin-top:16px">A camera face check runs before your ballot is sealed. Make sure you are alone in frame.</div>
   </div>
   <div class="dialog__foot">
     <button class="btn btn--ghost" type="button" data-close>Not me</button>
@@ -102,6 +103,31 @@
   </div>
 </dialog>
 
+<dialog class="dialog" id="faceDialog" aria-labelledby="faceTitle">
+  <div class="dialog__head">
+    <h2 id="faceTitle">Face verification</h2>
+    <p>Your face is checked against the photograph on file before the ballot is sealed. Only you may be on camera.</p>
+  </div>
+  <div class="dialog__body">
+    <div class="facecheck" id="facecheck" data-state="idle">
+      <div class="facecheck__stage">
+        <video class="facecheck__video" id="faceVideo" playsinline muted autoplay></video>
+        <div class="facecheck__reticle" aria-hidden="true"></div>
+      </div>
+      <p class="facecheck__status" id="faceStatus" role="status" aria-live="polite">
+        <span class="facecheck__dot" aria-hidden="true"></span>
+        <span id="faceStatusText">Starting the camera…</span>
+      </p>
+      <p class="facecheck__hint">If a second person enters the frame the check stops and must be started again. Your vote is not recorded until the check passes.</p>
+    </div>
+  </div>
+  <div class="dialog__foot">
+    <button class="btn btn--ghost" type="button" id="faceCancel">Cancel</button>
+    <button class="btn btn--primary" type="button" id="faceRetry" hidden>Try again</button>
+  </div>
+</dialog>
+
+<script src="/vendor/face-api/face-api.js"></script>
 <script type="module" src="/js/e-vote.js"></script>
 </body>
 </html>

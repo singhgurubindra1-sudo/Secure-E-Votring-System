@@ -1,6 +1,9 @@
 import { $, api, busy, mountSession, escapeHtml, setFieldError, clearFieldErrors, toast } from './app.js';
+import { runFaceCheck } from './face-gate.js';
 
 mountSession();
+
+let faceRequired = false;
 
 const form = $('#cardForm');
 const preview = $('#preview');
@@ -48,9 +51,14 @@ $('#verify').addEventListener('click', async (event) => {
   notify();
   const restore = busy(event.currentTarget, 'Checking');
   try {
-    const { voter } = await api('/api/card/verify', { method: 'POST', body: payload() });
-    showPreview(voter);
-    notify({ success: 'Details match the roll. You can download the card.' });
+    const data = await api('/api/card/verify', { method: 'POST', body: payload() });
+    faceRequired = Boolean(data.faceRequired);
+    showPreview(data.voter);
+    notify({
+      success: faceRequired
+        ? 'Details match the roll. A face check runs before the card is released.'
+        : 'Details match the roll. You can download the card.',
+    });
   } catch (err) {
     handleError(err);
   } finally {
@@ -64,10 +72,21 @@ form.addEventListener('submit', async (event) => {
   notify();
 
   const button = $('#download');
+  const body = payload();
+
+  if (faceRequired) {
+    try {
+      body.faceToken = await runFaceCheck({ voterId: body.voterId, purpose: 'card' });
+    } catch (err) {
+      notify({ error: err.message });
+      return;
+    }
+  }
+
   const restore = busy(button, 'Preparing PDF');
 
   try {
-    const response = await api('/api/card/download', { method: 'POST', body: payload(), raw: true });
+    const response = await api('/api/card/download', { method: 'POST', body, raw: true });
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
@@ -78,7 +97,7 @@ form.addEventListener('submit', async (event) => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `voter-card-${payload().voterId}.pdf`;
+    link.download = `voter-card-${body.voterId}.pdf`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -93,4 +112,4 @@ form.addEventListener('submit', async (event) => {
   }
 });
 
-form.addEventListener('input', () => { preview.hidden = true; notify(); });
+form.addEventListener('input', () => { preview.hidden = true; faceRequired = false; notify(); });

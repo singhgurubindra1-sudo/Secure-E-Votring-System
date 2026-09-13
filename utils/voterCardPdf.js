@@ -57,7 +57,7 @@ function inkMark(doc, cx, cy, r) {
   doc.opacity(1).restore();
 }
 
-function drawFront(doc, x, y, voter) {
+function drawFront(doc, x, y, voter, photo) {
   const code = verificationCode(voter);
 
   doc.save();
@@ -82,10 +82,26 @@ function drawFront(doc, x, y, voter) {
   const pw = 46;
   const ph = 56;
   doc.rect(px, py, pw, ph).fillColor(WASH).fill();
-  doc.rect(px, py, pw, ph).lineWidth(0.6).strokeColor(LINE).stroke();
-  inkMark(doc, px + pw / 2, py + ph / 2 - 4, 15);
-  doc.font('Helvetica').fontSize(5).fillColor(MUTED)
-    .text('PHOTOGRAPH', px, py + ph - 11, { width: pw, align: 'center', lineBreak: false });
+
+  if (photo) {
+    // cover the panel and clip the overflow, so any aspect ratio fills it
+    // without the face being squashed.
+    doc.save();
+    doc.rect(px, py, pw, ph).clip();
+    try {
+      doc.image(photo, px, py, { cover: [pw, ph], align: 'center', valign: 'center' });
+    } catch {
+      // An unreadable image must not cost the voter their card.
+      doc.rect(px, py, pw, ph).fillColor(WASH).fill();
+    }
+    doc.restore();
+    doc.rect(px, py, pw, ph).lineWidth(0.6).strokeColor(LINE).stroke();
+  } else {
+    doc.rect(px, py, pw, ph).lineWidth(0.6).strokeColor(LINE).stroke();
+    inkMark(doc, px + pw / 2, py + ph / 2 - 4, 15);
+    doc.font('Helvetica').fontSize(5).fillColor(MUTED)
+      .text('PHOTOGRAPH', px, py + ph - 11, { width: pw, align: 'center', lineBreak: false });
+  }
 
   // Details column
   const dx = px + pw + 14;
@@ -157,8 +173,9 @@ function drawBack(doc, x, y, voter, code) {
  * Streams the finished PDF to res.
  * @param {object} voter { name, voterId, dob, state, district }
  * @param {import('http').ServerResponse} res
+ * @param {{ photo?: Buffer|null }} options enrolled photograph, when there is one
  */
-function streamVoterCard(voter, res) {
+function streamVoterCard(voter, res, { photo = null } = {}) {
   const doc = new PDFDocument({ size: 'A4', margin: 0 });
   doc.pipe(res);
 
@@ -174,7 +191,7 @@ function streamVoterCard(voter, res) {
   const backY = frontY + CARD_H + 38;
 
   cutMarks(doc, x - 6, frontY - 6, CARD_W + 12, CARD_H + 12);
-  const code = drawFront(doc, x, frontY, voter);
+  const code = drawFront(doc, x, frontY, voter, photo);
 
   cutMarks(doc, x - 6, backY - 6, CARD_W + 12, CARD_H + 12);
   drawBack(doc, x, backY, voter, code);

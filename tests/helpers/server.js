@@ -1,21 +1,23 @@
 'use strict';
 
 /**
- * Boots the real server.js in a child process against the project's data
- * directory, with the roll seeded from voters.sample.json.
+ * Boots the real server.js in a child process against a throwaway data
+ * directory.
  *
- * The data files it touches are saved and put back on stop(), so running the
- * suite leaves data/ exactly as it was found.
+ * Each server gets its own DATA_DIR under the OS temp folder, seeded from
+ * data/voters.sample.json and data/candidates.json. Nothing in the repository's
+ * data/ is read or written, so test files run concurrently without fighting
+ * over the same JSON, and a real face enrolled locally is never disturbed.
  */
 
 const { spawn } = require('node:child_process');
 const fs = require('node:fs/promises');
 const net = require('node:net');
+const os = require('node:os');
 const path = require('node:path');
 
 const ROOT = path.join(__dirname, '..', '..');
-const DATA = path.join(ROOT, 'data');
-const MANAGED = ['voters.json', 'users.json', 'tickets.json', 'votes.json'];
+const REPO_DATA = path.join(ROOT, 'data');
 
 function freePort() {
   return new Promise((resolve, reject) => {
@@ -28,7 +30,7 @@ function freePort() {
   });
 }
 
-async function waitForHealth(base, child, timeoutMs = 15000) {
+async function waitForHealth(base, child, timeoutMs = 20000) {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     if (child.exitCode !== null) throw new Error(`server exited early (code ${child.exitCode})`);
@@ -43,26 +45,28 @@ async function waitForHealth(base, child, timeoutMs = 15000) {
   }
 }
 
-async function startServer(env = {}) {
-  // Save whatever is on disk so the suite is non-destructive.
-  const saved = new Map();
-  for (const file of MANAGED) {
-    const full = path.join(DATA, file);
-    try {
-      saved.set(file, await fs.readFile(full, 'utf8'));
-    } catch (err) {
-      if (err.code !== 'ENOENT') throw err;
-      saved.set(file, null);
-    }
-  }
+/** A fresh data directory holding the roll, the candidates and empty stores. */
+async function seedDataDir() {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'ev-data-'));
 
-  const roll = await fs.readFile(path.join(DATA, 'voters.sample.json'), 'utf8');
-  await fs.writeFile(path.join(DATA, 'voters.json'), roll, 'utf8');
+  const roll = await fs.readFile(path.join(REPO_DATA, 'voters.sample.json'), 'utf8');
+  await fs.writeFile(path.join(dir, 'voters.json'), roll, 'utf8');
+
+  const candidates = await fs.readFile(path.join(REPO_DATA, 'candidates.json'), 'utf8');
+  await fs.writeFile(path.join(dir, 'candidates.json'), candidates, 'utf8');
+
   for (const file of ['users.json', 'tickets.json', 'votes.json']) {
-    await fs.writeFile(path.join(DATA, file), '[]\n', 'utf8');
+    await fs.writeFile(path.join(dir, file), '[]\n', 'utf8');
   }
+  await fs.writeFile(path.join(dir, 'face-templates.json'), '{}\n', 'utf8');
 
+  return dir;
+}
+
+async function startServer(env = {}) {
+  const dataDir = await seedDataDir();
   const port = await freePort();
+
   const child = spawn(process.execPath, ['server.js'], {
     cwd: ROOT,
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -70,6 +74,7 @@ async function startServer(env = {}) {
       ...process.env,
       PORT: String(port),
       NODE_ENV: 'test',
+      DATA_DIR: dataDir,
       JWT_SECRET: 'end-to-end-test-secret-long-enough-to-pass',
       SESSION_HOURS: '1',
       MAIL_DRY_RUN: 'true',
@@ -78,6 +83,7 @@ async function startServer(env = {}) {
       SMTP_PORT: '1',
       SMTP_USER: 'unused@example.test',
       SMTP_PASS: 'unused',
+      ...env,
     },
   });
 
@@ -90,6 +96,7 @@ async function startServer(env = {}) {
     await waitForHealth(base, child);
   } catch (err) {
     child.kill('SIGKILL');
+    await fs.rm(dataDir, { recursive: true, force: true });
     throw new Error(`${err.message}\n--- server output ---\n${logs.join('')}`);
   }
 
@@ -105,15 +112,10 @@ async function startServer(env = {}) {
         resolve();
       });
     });
-
-    for (const [file, contents] of saved) {
-      const full = path.join(DATA, file);
-      if (contents === null) await fs.rm(full, { force: true });
-      else await fs.writeFile(full, contents, 'utf8');
-    }
+    await fs.rm(dataDir, { recursive: true, force: true });
   }
 
-  return { base, port, stop, logs };
+  return { base, port, dataDir, stop, logs };
 }
 
 /** A fetch bound to the server that carries the session cookie across calls. */

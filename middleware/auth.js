@@ -62,4 +62,4 @@ function requirePage(req, res, next) {
   next();
 }
 
-module.exports = { issueSession, clearSession, readSession, requireAuth, requirePage, COOKIE };
+module.exports = { issueSession, clearSession, readSession, requireAuth, requirePage, secret, COOKIE };

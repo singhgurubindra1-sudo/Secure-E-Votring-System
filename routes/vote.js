@@ -7,6 +7,8 @@ const rateLimit = require('express-rate-limit');
 const store = require('../utils/store');
 const { findByVoterId } = require('./voters');
 const { requireAuth } = require('../middleware/auth');
+const faces = require('../utils/faceTemplates');
+const faceToken = require('../utils/faceToken');
 const { clean, normalizeVoterId, ageOn } = require('../utils/validate');
 
 const router = express.Router();
@@ -53,9 +55,12 @@ router.post('/lookup', limiter, async (req, res, next) => {
 
     const age = ageOn(voter.dob);
     const alreadyVoted = await hasVoted(voter.voterId);
+    const faceEnrolled = await faces.isEnrolled(voter.voterId);
 
     res.json({
       ok: true,
+      faceEnrolled,
+      faceRequired: faceEnrolled || faces.enforcement() === 'all',
       voter: {
         name: voter.name,
         dob: voter.dob,
@@ -101,6 +106,28 @@ router.post('/cast', limiter, async (req, res, next) => {
     const age = ageOn(voter.dob);
     if (age !== null && age < 18) {
       return res.status(403).json({ ok: false, error: 'This voter is under 18 and cannot vote.' });
+    }
+
+    // Checked before the ballot is looked at, so a failed face check never
+    // reaches the point of recording anything.
+    const enrolled = await faces.isEnrolled(voter.voterId);
+    if (enrolled || faces.enforcement() === 'all') {
+      if (!enrolled) {
+        return res.status(403).json({
+          ok: false,
+          faceRequired: true,
+          faceEnrolled: false,
+          error: 'This voter has no face on file. Enrol a photograph before casting a ballot.',
+        });
+      }
+      if (!faceToken.verify(req.body.faceToken, voter.voterId, 'ballot')) {
+        return res.status(401).json({
+          ok: false,
+          faceRequired: true,
+          faceEnrolled: true,
+          error: 'Face verification is needed before a ballot can be cast.',
+        });
+      }
     }
 
     const candidates = await store.read('candidates', []);

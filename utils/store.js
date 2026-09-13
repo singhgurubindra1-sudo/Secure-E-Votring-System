@@ -14,7 +14,12 @@
 const fs = require('fs/promises');
 const path = require('path');
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
+// DATA_DIR lets a test run (or a second instance) work against its own
+// directory instead of the repository's data/, which keeps concurrent servers
+// from clobbering each other's files.
+const DATA_DIR = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(__dirname, '..', 'data');
 const queues = new Map();
 
 function filePath(name) {

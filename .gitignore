@@ -7,3 +7,9 @@ data/users.json
 data/votes.json
 data/tickets.json
 *.log
+
+# Biometric data. Face descriptors and card photographs identify a named
+# person, so they stay on the machine that enrolled them and are never
+# committed -- this repository is public.
+data/face-templates.json
+data/faces/
