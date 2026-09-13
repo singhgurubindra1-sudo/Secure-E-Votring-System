@@ -9,9 +9,9 @@ import { createFaceSession } from './face-verify.js';
  * action it guards, so the token is only ever seconds old when it is spent.
  */
 
-const LABELS = {
-  card: 'the card can be downloaded',
-  ballot: 'the ballot can be cast',
+const DONE_TEXT = {
+  card: 'Face verified — preparing your card…',
+  ballot: 'Face verified — sealing your ballot…',
 };
 
 export function runFaceCheck({ voterId, purpose }) {
@@ -94,7 +94,7 @@ export function runFaceCheck({ voterId, purpose }) {
           return;
         }
 
-        setState('matched', `Face verified. Releasing ${LABELS[purpose] || 'the action'}…`);
+        setState('matched', DONE_TEXT[purpose] || 'Face verified…');
         // Let the confirmation land before the dialog disappears.
         setTimeout(() => finish(result.token), 450);
       } catch (err) {

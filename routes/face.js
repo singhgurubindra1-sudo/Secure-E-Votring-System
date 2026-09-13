@@ -54,6 +54,8 @@ router.get('/assets', (req, res) => {
     modelsMissing: state.missingModels.length,
     reason: state.reason,
     hint: state.hint,
+    // Detector tuning lives in .env, so it can be adjusted without a code edit.
+    detector: faceAssets.detectorSettings(),
   });
 });
 

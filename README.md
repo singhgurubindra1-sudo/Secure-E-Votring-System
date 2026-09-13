@@ -72,6 +72,8 @@ released or their ballot is sealed.
    has to be started again.
 4. The 128-number descriptor is posted to the server, which compares it against
    the enrolled template and, on a match, issues a short-lived token.
+   Detections smaller than `FACE_MIN_SIZE` of the frame are ignored, so
+   background clutter cannot falsely trip the second-person rule.
 5. That token is required by `POST /api/card/download` and `POST /api/vote/cast`.
 
 The token is scoped to one voter ID and one action, so a token earned for a card
@@ -136,6 +138,39 @@ the check; there is no import step by design.
 | `FACE_MATCH_THRESHOLD` | `0.5` | Maximum distance that still counts as a match. Lower is stricter. |
 | `FACE_ENFORCE` | `enrolled` | `enrolled` challenges only voters with a face on file. `all` refuses a card or ballot to anyone not enrolled. |
 | `FACE_TOKEN_TTL` | `300` | Seconds a passed check stays valid. |
+| `FACE_INPUT_SIZE` | `320` | Frame size the detector works at. Smaller is faster. |
+| `FACE_SCORE_THRESHOLD` | `0.3` | How sure the detector must be it sees a face. Lower this if it keeps saying "no face found". |
+| `FACE_STABLE_SAMPLES` | `2` | Consecutive single-face reads before the measurement. |
+| `FACE_MIN_SIZE` | `0.15` | Smallest face, as a fraction of frame height, that counts as a person. |
+| `FACE_CAPTURE_TIMEOUT` | `20000` | Milliseconds before the check gives up. |
+
+The browser reads the detector settings from the server, so these can be
+changed in `.env` and take effect on the next page load — no code edit.
+
+### How long the check takes
+
+The detector defaults were chosen by timing TinyFaceDetector over the six
+sample faces that ship with the library:
+
+| `inputSize` | Faces found | Time per pass (CPU) |
+| --- | --- | --- |
+| 224 @ 0.5 | 3 of 6 | 454 ms |
+| 320 @ 0.3 | **6 of 6** | **959 ms** |
+| 416 @ 0.5 | 6 of 6 | 1737 ms |
+
+`416` was no more accurate than `320` and took nearly twice as long, and a
+score threshold of `0.5` started missing faces outright — which is what a
+headscarf, glasses or dim indoor light look like to the detector.
+
+The check also makes two passes rather than three: a cheap small-input pass
+counts faces until one holds steady, then one full pass measures it, and
+because that pass asks for *all* faces it returns the count and the
+measurement from the same frame. End to end that is about **2.7 seconds on a
+CPU backend**, and less where WebGL is available.
+
+If it still feels slow, lower `FACE_INPUT_SIZE` to `224` and
+`FACE_STABLE_SAMPLES` to `1`. If it fails to see you, lower
+`FACE_SCORE_THRESHOLD` to `0.2`.
 
 `FACE_ENFORCE=enrolled` is the default so the roll stays usable while people are
 enrolled one at a time. It does mean a voter who has never enrolled is not

@@ -13,16 +13,75 @@
  */
 
 const MODEL_URL = '/models';
-const DETECTOR = { inputSize: 416, scoreThreshold: 0.5 };
 
-// Consecutive single-face samples required before a reading is taken. At the
-// sample interval below this is a little under a second of a steady frame.
-const STABLE_SAMPLES = 6;
-const SAMPLE_MS = 140;
-const CAPTURE_TIMEOUT_MS = 30000;
+/**
+ * Detector defaults, timed against the six sample faces that ship with the
+ * library. inputSize 320 found a face in all six at roughly half the cost of
+ * 416, which was no more accurate; scoreThreshold 0.5 began missing faces,
+ * which is what a headscarf or dim indoor light looks like to the detector.
+ * The server can override all of this from .env -- see loadSettings().
+ */
+const DEFAULTS = {
+  inputSize: 320,
+  scoreThreshold: 0.3,
+  stableSamples: 2,
+  captureTimeoutMs: 20000,
+  minFaceRatio: 0.15,
+};
 
+// Counting faces needs far less precision than measuring one, so the watch for
+// a second person runs smaller and cheaper than the main pass.
+const WATCH = { inputSize: 224, scoreThreshold: 0.25 };
+
+let settings = { ...DEFAULTS };
+let settingsPromise = null;
 let modelsPromise = null;
 let backendPromise = null;
+let backendName = null;
+
+/** Pulls detector tuning from the server once per page. */
+function loadSettings() {
+  if (settingsPromise) return settingsPromise;
+  settingsPromise = fetch('/api/face/assets', { headers: { accept: 'application/json' } })
+    .then((res) => (res.ok ? res.json() : null))
+    .then((body) => {
+      if (body && body.detector) settings = { ...DEFAULTS, ...body.detector };
+      return settings;
+    })
+    .catch(() => settings);
+  return settingsPromise;
+}
+
+/** The options object the detector wants, built from current settings. */
+function detectorOptions() {
+  const api = faceapi();
+  return new api.TinyFaceDetectorOptions({
+    inputSize: settings.inputSize,
+    scoreThreshold: settings.scoreThreshold,
+  });
+}
+
+export function backendInUse() {
+  return backendName;
+}
+
+/**
+ * Drops detections too small to be somebody at the camera.
+ *
+ * A forgiving score threshold is what makes the detector see a face in poor
+ * light, but it also fires on background clutter now and then. Those blobs are
+ * small, and left in they would trip the second-person rule on a voter sitting
+ * alone -- a false abort is as bad as a missed face. Anyone actually using the
+ * camera fills a good part of the frame.
+ */
+function bigEnough(boxes, frameHeight) {
+  if (!frameHeight) return boxes;
+  const floor = frameHeight * settings.minFaceRatio;
+  return boxes.filter((entry) => {
+    const box = entry.box || (entry.detection && entry.detection.box);
+    return !box || box.height >= floor;
+  });
+}
 
 function faceapi() {
   if (!window.faceapi) {
@@ -80,6 +139,7 @@ function initBackend() {
       try {
         if (await tf.setBackend(name)) {
           await tf.ready();
+          backendName = name;
           return name;
         }
       } catch {
@@ -99,7 +159,7 @@ function initBackend() {
 function loadModels() {
   if (modelsPromise) return modelsPromise;
   const api = faceapi();
-  modelsPromise = initBackend().then(() => Promise.all([
+  modelsPromise = Promise.all([initBackend(), loadSettings()]).then(() => Promise.all([
     api.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
     api.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
     api.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
@@ -168,9 +228,11 @@ export function createFaceSession({ video, onStatus = () => {} }) {
     status('ready', 'Centre your face in the frame.');
   }
 
-  async function detectAll() {
+  /** Cheap face count, for the "is anybody else here" checks. */
+  async function countFaces() {
     const api = faceapi();
-    return api.detectAllFaces(video, new api.TinyFaceDetectorOptions(DETECTOR));
+    const faces = await api.detectAllFaces(video, new api.TinyFaceDetectorOptions(WATCH));
+    return bigEnough(faces, video.videoHeight).length;
   }
 
   /**
@@ -183,9 +245,9 @@ export function createFaceSession({ video, onStatus = () => {} }) {
     (async () => {
       while (watching && stream) {
         try {
-          const faces = await detectAll();
+          const count = await countFaces();
           if (!watching) return;
-          if (faces.length > 1) {
+          if (count > 1) {
             watching = false;
             abortReason = 'A second person appeared in the frame. Verification was stopped.';
             status('aborted', abortReason);
@@ -195,7 +257,7 @@ export function createFaceSession({ video, onStatus = () => {} }) {
         } catch {
           // A dropped frame is not a failure; the next sample will catch up.
         }
-        await new Promise((r) => setTimeout(r, SAMPLE_MS * 2));
+        await new Promise((r) => setTimeout(r, 400));
       }
     })();
   }
@@ -205,71 +267,93 @@ export function createFaceSession({ video, onStatus = () => {} }) {
   }
 
   /**
-   * Resolves with a 128-number descriptor once one face has been steady in
-   * frame. Rejects if a second face appears, nobody appears, or time runs out.
+   * Resolves with a 128-number descriptor once one face has held the frame.
+   *
+   * Two passes, not three. A cheap small-input pass just counts faces until one
+   * has held steady, then a single full pass measures it -- and because that
+   * pass asks for *all* faces, it reports the count and the descriptor
+   * together. The earlier version detected, then detected again inside the
+   * descriptor call, then counted once more afterwards, which is most of why
+   * this took six seconds.
+   *
+   * A dropped frame decrements the run of good reads rather than resetting it;
+   * demanding a clean restart after every blink was the other half.
    */
   async function capture() {
     const api = faceapi();
-    const deadline = Date.now() + CAPTURE_TIMEOUT_MS;
+    const deadline = Date.now() + settings.captureTimeoutMs;
+    const needed = settings.stableSamples;
     let steady = 0;
+    let everSawFace = false;
+
+    const tooManyFaces = (count, whileReading) => {
+      abortReason = whileReading
+        ? 'A second person appeared while reading. Verification stopped.'
+        : `${count} faces are in the frame. Verification stopped — only the voter may be on camera.`;
+      status('aborted', abortReason);
+      return new Error(abortReason);
+    };
 
     for (;;) {
       if (!stream) throw new Error('The camera was closed before a reading was taken.');
       if (Date.now() > deadline) {
-        throw new Error('No steady face was found in time. Check the lighting and try again.');
+        throw new Error(
+          everSawFace
+            ? 'Your face kept slipping out of frame. Hold still, face the camera, and try again.'
+            : 'No face was found. Move into better light and fill more of the frame, then try again.'
+        );
       }
 
-      let faces;
+      // Cheap presence check: counting faces needs far less detail than
+      // measuring one, so this runs at a smaller input size.
+      let count;
       try {
-        faces = await detectAll();
+        count = await countFaces();
       } catch {
-        await new Promise((r) => setTimeout(r, SAMPLE_MS));
+        continue; // a dropped frame is not a failure
+      }
+
+      if (count > 1) throw tooManyFaces(count, false);
+
+      if (count === 0) {
+        steady = Math.max(0, steady - 1);
+        status('searching', 'Looking for your face — centre it in the frame.');
         continue;
       }
 
-      if (faces.length > 1) {
-        // The explicit requirement: more than one person stops the check.
-        abortReason = `${faces.length} faces are in the frame. Verification stopped — only the voter may be on camera.`;
-        status('aborted', abortReason);
-        throw new Error(abortReason);
-      }
-
-      if (faces.length === 0) {
-        steady = 0;
-        status('searching', 'No face detected. Centre your face in the frame.');
-        await new Promise((r) => setTimeout(r, SAMPLE_MS));
-        continue;
-      }
-
+      everSawFace = true;
       steady += 1;
-      if (steady < STABLE_SAMPLES) {
-        status('holding', `Hold still… ${steady}/${STABLE_SAMPLES}`);
-        await new Promise((r) => setTimeout(r, SAMPLE_MS));
+      if (steady < needed) {
+        status('holding', `Hold still… ${steady}/${needed}`);
         continue;
       }
 
+      // One full pass for everything: asking for all faces means the count and
+      // the measurement come from the same frame, so nobody can slip in
+      // between the two.
       status('reading', 'Reading your face…');
-      const result = await api
-        .detectSingleFace(video, new api.TinyFaceDetectorOptions(DETECTOR))
-        .withFaceLandmarks()
-        .withFaceDescriptor();
-
-      if (!result || !result.descriptor) {
-        steady = 0;
-        status('searching', 'That reading was unclear. Hold still and try again.');
-        await new Promise((r) => setTimeout(r, SAMPLE_MS));
+      let results;
+      try {
+        const all = await api
+          .detectAllFaces(video, detectorOptions())
+          .withFaceLandmarks()
+          .withFaceDescriptors();
+        results = bigEnough(all, video.videoHeight);
+      } catch {
+        steady = Math.max(0, needed - 1);
         continue;
       }
 
-      // One last look, in case somebody stepped in during the reading itself.
-      const after = await detectAll().catch(() => []);
-      if (after.length > 1) {
-        abortReason = 'A second person appeared while reading. Verification stopped.';
-        status('aborted', abortReason);
-        throw new Error(abortReason);
+      if (results.length > 1) throw tooManyFaces(results.length, true);
+
+      if (results.length === 0 || !results[0].descriptor) {
+        // The face is clearly there; the read was poor. Keep most of the credit.
+        steady = Math.max(0, needed - 1);
+        status('holding', 'That reading was unclear — hold still.');
+        continue;
       }
 
-      return Array.from(result.descriptor);
+      return Array.from(results[0].descriptor);
     }
   }
 
@@ -335,13 +419,13 @@ export async function describeImageFile(file) {
   const url = URL.createObjectURL(file);
   try {
     const image = await loadImageElement(url);
-    const faces = await api.detectAllFaces(image, new api.TinyFaceDetectorOptions(DETECTOR));
+    const faces = await api.detectAllFaces(image, detectorOptions());
 
     if (faces.length === 0) return { ok: false, reason: 'no face found' };
     if (faces.length > 1) return { ok: false, reason: `${faces.length} faces found — use a photo of one person` };
 
     const result = await api
-      .detectSingleFace(image, new api.TinyFaceDetectorOptions(DETECTOR))
+      .detectSingleFace(image, detectorOptions())
       .withFaceLandmarks()
       .withFaceDescriptor();
 
