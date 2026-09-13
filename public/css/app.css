@@ -21,6 +21,8 @@
   --verify-soft: #e6f2ed;
   --alert: #b3261e;
   --alert-soft: #fdeceb;
+  --warn: #8a5300;
+  --warn-soft: #fdf4e3;
 
   --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --serif: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
@@ -371,6 +373,12 @@ dialog::backdrop { background: rgba(20, 27, 45, .52); backdrop-filter: blur(2px)
 .notice--info { background: var(--violet-soft); border-color: #dfd2f0; color: var(--violet-deep); }
 .notice--good { background: var(--verify-soft); border-color: #c5e2d7; color: var(--verify); }
 .notice--bad  { background: var(--alert-soft); border-color: #f3cdca; color: var(--alert); }
+.notice--warn { background: var(--warn-soft); border-color: #f0dcb4; color: var(--warn); }
+
+/* .notice is a flex row, so multi-element content needs one wrapper to stay as
+   a single flowing paragraph instead of becoming gapped flex items. */
+.notice > span { display: block; }
+.notice a { color: inherit; text-decoration: underline; }
 .notice[hidden] { display: none; }
 
 .pill {

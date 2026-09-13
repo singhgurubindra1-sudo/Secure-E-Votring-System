@@ -62,6 +62,9 @@
 
     <div class="notice notice--bad" data-form-error hidden></div>
     <div class="notice notice--good" data-form-ok hidden></div>
+    <!-- Says plainly whether a camera check will run, so an unenrolled voter
+         is never silently waved through without explanation. -->
+    <div class="notice" id="faceState" hidden></div>
 
     <div style="display:flex;gap:10px;margin-top:22px;flex-wrap:wrap">
       <button class="btn btn--ghost" type="button" id="verify">Check details</button>

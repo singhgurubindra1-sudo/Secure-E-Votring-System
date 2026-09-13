@@ -64,7 +64,21 @@ form.addEventListener('submit', async (event) => {
     toBallot.disabled = Boolean(warning);
     toBallot.textContent = warning ? 'Ballot unavailable' : 'Yes, continue to ballot';
 
-    faceNotice.hidden = Boolean(warning) || !faceRequired;
+    // Say which it is, rather than showing nothing when no face is on file.
+    if (warning) {
+      faceNotice.hidden = true;
+    } else if (faceRequired) {
+      faceNotice.className = 'notice notice--info';
+      faceNotice.innerHTML =
+        '<span>A camera face check runs before your ballot is sealed. Make sure you are alone in frame.</span>';
+      faceNotice.hidden = false;
+    } else {
+      faceNotice.className = 'notice notice--warn';
+      faceNotice.innerHTML =
+        '<span>No face is on file for this voter ID, so <strong>no camera check will run</strong>. ' +
+        '<a href="/enrol-face">Enrol a face</a> to require one.</span>';
+      faceNotice.hidden = false;
+    }
 
     credsDialog.showModal();
   } catch (err) {

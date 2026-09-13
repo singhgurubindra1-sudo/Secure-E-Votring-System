@@ -66,7 +66,8 @@
   <div class="dialog__body">
     <div class="creds" id="credsBody"></div>
     <div class="notice notice--bad" id="credsWarning" hidden style="margin-top:16px"></div>
-    <div class="notice notice--info" id="faceNotice" hidden style="margin-top:16px">A camera face check runs before your ballot is sealed. Make sure you are alone in frame.</div>
+    <!-- Filled in by e-vote.js, which says whether a camera check is due. -->
+    <div class="notice" id="faceNotice" hidden style="margin-top:16px"></div>
   </div>
   <div class="dialog__foot">
     <button class="btn btn--ghost" type="button" data-close>Not me</button>

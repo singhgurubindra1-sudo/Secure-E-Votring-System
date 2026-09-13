@@ -6,10 +6,33 @@ mountSession();
 let faceRequired = false;
 
 const form = $('#cardForm');
+const faceState = $('#faceState');
 const preview = $('#preview');
 const previewBody = $('#previewBody');
 const errorBox = form.querySelector('[data-form-error]');
 const okBox = form.querySelector('[data-form-ok]');
+
+/**
+ * Spells out the face-check state. Without this an unenrolled voter just gets a
+ * card with no camera step and no idea why.
+ */
+function showFaceState(data) {
+  if (data === null) {
+    faceState.hidden = true;
+    return;
+  }
+  if (data.faceRequired) {
+    faceState.className = 'notice notice--info';
+    faceState.innerHTML =
+      '<span>A camera face check runs before the card is released. Make sure you are alone in frame.</span>';
+  } else {
+    faceState.className = 'notice notice--warn';
+    faceState.innerHTML =
+      '<span>No face is on file for this voter ID, so <strong>no camera check will run</strong>. ' +
+      '<a href="/enrol-face">Enrol a face</a> to require one.</span>';
+  }
+  faceState.hidden = false;
+}
 
 function notify({ error = '', success = '' } = {}) {
   errorBox.textContent = error;
@@ -38,6 +61,7 @@ function showPreview(voter) {
 
 function handleError(err) {
   preview.hidden = true;
+  showFaceState(null);
   if (err.field) {
     setFieldError(form, err.field, err.message);
     notify();
@@ -54,11 +78,8 @@ $('#verify').addEventListener('click', async (event) => {
     const data = await api('/api/card/verify', { method: 'POST', body: payload() });
     faceRequired = Boolean(data.faceRequired);
     showPreview(data.voter);
-    notify({
-      success: faceRequired
-        ? 'Details match the roll. A face check runs before the card is released.'
-        : 'Details match the roll. You can download the card.',
-    });
+    showFaceState(data);
+    notify({ success: 'Details match the roll. You can download the card.' });
   } catch (err) {
     handleError(err);
   } finally {
@@ -74,6 +95,21 @@ form.addEventListener('submit', async (event) => {
   const button = $('#download');
   const body = payload();
 
+  // Ask the server whether a face check is due rather than trusting a flag set
+  // by an earlier click -- the voter may have come straight here.
+  let restore = busy(button, 'Checking details');
+  try {
+    const check = await api('/api/card/verify', { method: 'POST', body });
+    faceRequired = Boolean(check.faceRequired);
+    showPreview(check.voter);
+    showFaceState(check);
+  } catch (err) {
+    restore();
+    handleError(err);
+    return;
+  }
+  restore();
+
   if (faceRequired) {
     try {
       body.faceToken = await runFaceCheck({ voterId: body.voterId, purpose: 'card' });
@@ -83,7 +119,7 @@ form.addEventListener('submit', async (event) => {
     }
   }
 
-  const restore = busy(button, 'Preparing PDF');
+  restore = busy(button, 'Preparing PDF');
 
   try {
     const response = await api('/api/card/download', { method: 'POST', body, raw: true });
@@ -112,4 +148,9 @@ form.addEventListener('submit', async (event) => {
   }
 });
 
-form.addEventListener('input', () => { preview.hidden = true; faceRequired = false; notify(); });
+form.addEventListener('input', () => {
+  preview.hidden = true;
+  faceRequired = false;
+  showFaceState(null);
+  notify();
+});

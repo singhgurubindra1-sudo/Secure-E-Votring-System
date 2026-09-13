@@ -80,6 +80,11 @@ guards, so the token is only ever seconds old.
 
 ### Enrolling a face
 
+**No face is enrolled until you do this, and until then no camera check runs.**
+`data/face-templates.json` is not in the repository, so a fresh clone has no
+faces on file. Both guarded pages say so plainly when the voter has none —
+look for the amber "no camera check will run" notice.
+
 Sign in and open **Enrol a face** from the dashboard, or go to `/enrol-face`.
 Pick the voter ID and two or three clear, front-facing photographs with only
 that person in frame. The pictures are read in the browser; only the resulting
@@ -159,6 +164,23 @@ data/                  JSON data files (biometric files are gitignored)
 tests/                 node:test suites and image fixtures
 scripts/               import-voters.js
 ```
+
+## Resetting between tests
+
+```bash
+npm run reset              # ballots, accounts, tickets, uploads, dry-run mail
+npm run reset -- --votes   # just the ballots, to vote again
+npm run reset -- --faces   # just the enrolled faces and card photographs
+npm run reset -- --all     # everything above, plus the electoral roll
+```
+
+The default run deliberately **keeps the roll and any enrolled face**, so
+testing a second ballot does not mean enrolling again. `npm run reset --
+--votes` is the one to use after hitting *"A vote has already been recorded for
+this voter ID"*.
+
+After `--all`, put the roll back with
+`npm run import-voters -- data/voters.sample.json`.
 
 ## Tests
 
