@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard · Secure E-Voting</title>
+<link rel="stylesheet" href="/css/app.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="mark" href="/dashboard">
+      <span class="mark__glyph" aria-hidden="true"></span>
+      <span class="mark__text">Secure E-Voting<span>Electoral services portal</span></span>
+    </a>
+    <div class="topbar__spacer"></div>
+    <div class="topbar__user">
+      <span>Signed in as</span>
+      <strong data-session-name>&nbsp;</strong>
+      <button class="btn btn--quiet" type="button" data-signout>Sign out</button>
+    </div>
+  </div>
+</header>
+
+<main class="shell" id="main">
+  <div class="pagehead">
+    <h1>What would you like to do?</h1>
+    <p>Everything below works from your voter ID number. Pick a service to begin.</p>
+  </div>
+
+  <div class="ballot">
+    <div class="ballot__caption">
+      <h2>Electoral services</h2>
+      <span>Four services available</span>
+    </div>
+
+    <a class="ballot__row reveal" href="/voter-list" style="animation-delay:.02s">
+      <span class="ballot__stub" aria-hidden="true">01</span>
+      <span class="ballot__body">
+        <h3>Voter list check</h3>
+        <p>Search the full electoral roll by name or voter ID and confirm your entry.</p>
+      </span>
+      <span class="ballot__box" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+    </a>
+
+    <a class="ballot__row reveal" href="/voter-card" style="animation-delay:.08s">
+      <span class="ballot__stub" aria-hidden="true">02</span>
+      <span class="ballot__body">
+        <h3>Voter card download</h3>
+        <p>Enter your name, date of birth and voter ID to download a print-ready card as a PDF.</p>
+      </span>
+      <span class="ballot__box" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+    </a>
+
+    <a class="ballot__row reveal" href="/e-vote" style="animation-delay:.14s">
+      <span class="ballot__stub" aria-hidden="true">03</span>
+      <span class="ballot__body">
+        <h3>E-Vote</h3>
+        <p>Confirm your details, then cast one sealed ballot. A voter ID can be used only once.</p>
+      </span>
+      <span class="ballot__box" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+    </a>
+
+    <a class="ballot__row reveal" href="/raise-ticket" style="animation-delay:.2s">
+      <span class="ballot__stub" aria-hidden="true">04</span>
+      <span class="ballot__body">
+        <h3>Raise a ticket</h3>
+        <p>Report a wrong entry, a missing name or any other problem. Attach photos or a PDF.</p>
+      </span>
+      <span class="ballot__box" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+    </a>
+  </div>
+
+  <p style="margin-top:22px;font-size:13px;color:var(--muted);max-width:62ch">
+    Names on the roll are published for public verification. Your ballot choice is not.
+  </p>
+</main>
+
+<script type="module" src="/js/dashboard.js"></script>
+</body>
+</html>

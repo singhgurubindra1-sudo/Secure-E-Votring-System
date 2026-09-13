@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E-Vote · Secure E-Voting</title>
+<link rel="stylesheet" href="/css/app.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="mark" href="/dashboard">
+      <span class="mark__glyph" aria-hidden="true"></span>
+      <span class="mark__text">Secure E-Voting<span>Electoral services portal</span></span>
+    </a>
+    <div class="topbar__spacer"></div>
+    <div class="topbar__user">
+      <span>Signed in as</span>
+      <strong data-session-name>&nbsp;</strong>
+      <button class="btn btn--quiet" type="button" data-signout>Sign out</button>
+    </div>
+  </div>
+</header>
+
+<main class="shell shell--narrow" id="main">
+  <a class="crumb" href="/dashboard">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+    Back to dashboard
+  </a>
+
+  <div class="pagehead">
+    <h1>E-Vote</h1>
+    <p>Enter your voter ID number. We will show your details for you to confirm before any ballot opens.</p>
+  </div>
+
+  <form class="panel" id="lookupForm" novalidate>
+    <h2 class="panel__title">Identify yourself</h2>
+    <p class="panel__sub">Your ID is checked against the electoral roll.</p>
+
+    <div class="field">
+      <label for="v-voterId">Voter ID number</label>
+      <input type="text" id="v-voterId" name="voterId" class="uppercase-input" required placeholder="ASM1234567" autocomplete="off" spellcheck="false" autofocus>
+      <div class="field__error" data-error-for="voterId"></div>
+    </div>
+
+    <div class="notice notice--bad" data-form-error hidden></div>
+
+    <button class="btn btn--primary" type="submit" style="margin-top:6px">Confirm my details</button>
+  </form>
+
+  <div class="notice notice--info" style="margin-top:20px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex:none;margin-top:2px" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5"/><path d="M12 8h.01"/></svg>
+    <span>Your ballot is stored against a one-way fingerprint of your voter ID, so no record connects you to the candidate you pick.</span>
+  </div>
+</main>
+
+<!-- Credentials confirmation -->
+<dialog id="credsDialog" aria-labelledby="credsTitle">
+  <div class="dialog__head">
+    <h2 id="credsTitle">Confirm these are your details</h2>
+    <p>Found on the electoral roll for this voter ID.</p>
+  </div>
+  <div class="dialog__body">
+    <div class="creds" id="credsBody"></div>
+    <div class="notice notice--bad" id="credsWarning" hidden style="margin-top:16px"></div>
+  </div>
+  <div class="dialog__foot">
+    <button class="btn btn--ghost" type="button" data-close>Not me</button>
+    <button class="btn btn--primary" type="button" id="toBallot">Yes, continue to ballot</button>
+  </div>
+</dialog>
+
+<!-- Ballot -->
+<dialog id="ballotDialog" aria-labelledby="ballotTitle">
+  <div class="dialog__head">
+    <h2 id="ballotTitle">Cast your vote</h2>
+    <p>Select one candidate. This cannot be changed once submitted.</p>
+  </div>
+  <div class="dialog__body">
+    <div id="ballotBody"></div>
+  </div>
+  <div class="dialog__foot">
+    <button class="btn btn--ghost" type="button" data-close>Cancel</button>
+    <button class="btn btn--dark" type="button" id="castVote" disabled>Cast vote</button>
+  </div>
+</dialog>
+
+<!-- Receipt -->
+<dialog id="receiptDialog" aria-labelledby="receiptTitle">
+  <div class="dialog__head">
+    <h2 id="receiptTitle">Vote recorded</h2>
+    <p>Keep this receipt. It proves a ballot was cast without revealing your choice.</p>
+  </div>
+  <div class="dialog__body">
+    <div class="creds" id="receiptBody"></div>
+  </div>
+  <div class="dialog__foot">
+    <button class="btn btn--primary" type="button" data-close>Done</button>
+  </div>
+</dialog>
+
+<script type="module" src="/js/e-vote.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+node_modules/
+.env
+outbox/
+uploads/*
+!uploads/.gitkeep
+data/users.json
+data/votes.json
+data/tickets.json
+*.log

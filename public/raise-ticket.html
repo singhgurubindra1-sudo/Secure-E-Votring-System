@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raise a ticket · Secure E-Voting</title>
+<link rel="stylesheet" href="/css/app.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="mark" href="/dashboard">
+      <span class="mark__glyph" aria-hidden="true"></span>
+      <span class="mark__text">Secure E-Voting<span>Electoral services portal</span></span>
+    </a>
+    <div class="topbar__spacer"></div>
+    <div class="topbar__user">
+      <span>Signed in as</span>
+      <strong data-session-name>&nbsp;</strong>
+      <button class="btn btn--quiet" type="button" data-signout>Sign out</button>
+    </div>
+  </div>
+</header>
+
+<main class="shell shell--narrow" id="main">
+  <a class="crumb" href="/dashboard">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+    Back to dashboard
+  </a>
+
+  <div class="pagehead">
+    <h1>Raise a ticket</h1>
+    <p>Tell us what went wrong. Attach photos or a PDF if they help explain the problem. You will get a reference number to quote later.</p>
+  </div>
+
+  <form class="panel" id="ticketForm" novalidate>
+    <div class="row2">
+      <div class="field">
+        <label for="t-name">Name</label>
+        <input type="text" id="t-name" name="name" autocomplete="name" required placeholder="Your full name">
+        <div class="field__error" data-error-for="name"></div>
+      </div>
+
+      <div class="field">
+        <label for="t-phone">Phone number</label>
+        <input type="tel" id="t-phone" name="phone" autocomplete="tel" required placeholder="10-digit mobile number" inputmode="numeric">
+        <div class="field__error" data-error-for="phone"></div>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label for="t-email">Email address</label>
+        <input type="email" id="t-email" name="email" autocomplete="email" required placeholder="you@example.com">
+        <div class="field__error" data-error-for="email"></div>
+      </div>
+
+      <div class="field">
+        <label for="t-category">What is this about?</label>
+        <select id="t-category" name="category">
+          <option>Name missing from the roll</option>
+          <option>Wrong details on my entry</option>
+          <option>Voter card download problem</option>
+          <option>Trouble casting my vote</option>
+          <option>Something else</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="t-issue">Issue</label>
+      <textarea id="t-issue" name="issue" required placeholder="Describe what happened, including any error message you saw."></textarea>
+      <div style="display:flex;justify-content:space-between;gap:12px">
+        <p class="field__hint">At least 15 characters.</p>
+        <p class="field__hint"><span id="issueCount">0</span>/5000</p>
+      </div>
+      <div class="field__error" data-error-for="issue"></div>
+    </div>
+
+    <div class="field">
+      <label for="t-files">Attachments</label>
+
+      <div class="dropzone" id="dropzone" tabindex="0" role="button"
+           aria-describedby="dropHint" aria-label="Add attachments">
+        <div class="dropzone__icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v13"/></svg>
+        </div>
+        <strong>Drop images or PDFs here, or click to browse</strong>
+        <span id="dropHint">Up to 10 files, 10 MB each. JPG, PNG, WEBP, HEIC or PDF.</span>
+      </div>
+
+      <input type="file" id="t-files" name="attachments" multiple
+             accept="image/jpeg,image/png,image/webp,image/heic,application/pdf" hidden>
+
+      <ul class="filelist" id="filelist"></ul>
+      <div class="field__error" data-error-for="attachments"></div>
+    </div>
+
+    <div class="notice notice--bad" data-form-error hidden></div>
+    <div class="notice notice--good" data-form-ok hidden></div>
+
+    <div style="display:flex;gap:10px;margin-top:22px;flex-wrap:wrap">
+      <button class="btn btn--primary" type="submit">Send ticket</button>
+      <button class="btn btn--ghost" type="reset">Clear form</button>
+    </div>
+
+    <p class="field__hint" style="margin-top:16px">
+      Your ticket goes straight to the support team, who will reply to the email address above.
+    </p>
+  </form>
+
+  <div class="panel" id="mine" hidden>
+    <h2 class="panel__title">Your recent tickets</h2>
+    <p class="panel__sub">Quote the reference when you follow up.</p>
+    <div id="mineBody"></div>
+  </div>
+</main>
+
+<script type="module" src="/js/raise-ticket.js"></script>
+</body>
+</html>

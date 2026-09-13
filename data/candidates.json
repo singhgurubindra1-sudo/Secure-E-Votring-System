@@ -1,0 +1,6 @@
+[
+  { "id": "cand-01", "name": "Anjali Deka",      "party": "Progressive Alliance",  "symbol": "Lotus leaf" },
+  { "id": "cand-02", "name": "Rituparna Saikia", "party": "People's Front",        "symbol": "Lantern" },
+  { "id": "cand-03", "name": "Bhaskar Nath",     "party": "Unity Party",           "symbol": "Boat" },
+  { "id": "cand-04", "name": "NOTA",             "party": "None of the above",     "symbol": "Crossed ballot" }
+]

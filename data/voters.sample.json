@@ -1,0 +1,5 @@
+[
+  { "slNo": 1, "name": "Arnab Baruah",   "voterId": "ASM1234567", "state": "Assam", "district": "Kamrup Metropolitan", "dob": "1994-03-17" },
+  { "slNo": 2, "name": "Priyanka Gogoi", "voterId": "ASM1234568", "state": "Assam", "district": "Jorhat",              "dob": "1988-11-02" },
+  { "slNo": 3, "name": "Imran Hussain",  "voterId": "ASM1234569", "state": "Assam", "district": "Nagaon",              "dob": "2001-07-25" }
+]

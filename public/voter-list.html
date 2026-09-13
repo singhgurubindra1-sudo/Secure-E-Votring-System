@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voter list · Secure E-Voting</title>
+<link rel="stylesheet" href="/css/app.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="mark" href="/dashboard">
+      <span class="mark__glyph" aria-hidden="true"></span>
+      <span class="mark__text">Secure E-Voting<span>Electoral services portal</span></span>
+    </a>
+    <div class="topbar__spacer"></div>
+    <div class="topbar__user">
+      <span>Signed in as</span>
+      <strong data-session-name>&nbsp;</strong>
+      <button class="btn btn--quiet" type="button" data-signout>Sign out</button>
+    </div>
+  </div>
+</header>
+
+<main class="shell" id="main">
+  <a class="crumb" href="/dashboard">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+    Back to dashboard
+  </a>
+
+  <div class="pagehead">
+    <h1>Voter list check</h1>
+    <p>Search the electoral roll to confirm your entry. Type a name or a voter ID — results narrow as you type.</p>
+  </div>
+
+  <form class="filters" id="filters" role="search">
+    <div class="field">
+      <label for="f-name">Search by name</label>
+      <input type="search" id="f-name" name="name" placeholder="e.g. Arnab Baruah" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="f-voterId">Search by voter ID</label>
+      <input type="search" id="f-voterId" name="voterId" class="uppercase-input" placeholder="e.g. ASM1234567" autocomplete="off" spellcheck="false">
+    </div>
+    <button class="btn btn--ghost" type="reset">Clear filters</button>
+  </form>
+
+  <div class="tablewrap">
+    <table>
+      <caption class="skip">Electoral roll</caption>
+      <thead>
+        <tr>
+          <th class="num" scope="col"><button type="button" data-sort="slNo">Sl. No.</button></th>
+          <th scope="col"><button type="button" data-sort="name">Name</button></th>
+          <th scope="col"><button type="button" data-sort="voterId">Voter ID number</button></th>
+          <th scope="col"><button type="button" data-sort="state">State</button></th>
+          <th scope="col"><button type="button" data-sort="district">District</button></th>
+          <th scope="col"><button type="button" data-sort="dob">Date of birth</button></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <div id="empty" class="empty" hidden>
+      <h3>The roll has not been loaded yet</h3>
+      <p>Once voter records are added to <code>data/voters.json</code> they will appear here.</p>
+    </div>
+
+    <div class="tablefoot">
+      <span id="count" aria-live="polite">Loading the roll…</span>
+      <div class="pager">
+        <button type="button" id="prev" disabled>Previous</button>
+        <span id="pageLabel">Page 1</span>
+        <button type="button" id="next" disabled>Next</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="module" src="/js/voter-list.js"></script>
+</body>
+</html>
