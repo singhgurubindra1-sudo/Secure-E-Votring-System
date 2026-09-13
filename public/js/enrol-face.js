@@ -1,5 +1,5 @@
 import { $, api, busy, mountSession, escapeHtml, setFieldError, clearFieldErrors, toast } from './app.js';
-import { describeImageFile, cropFace } from './face-verify.js';
+import { describeImageFile, cropFace, ensureLibrary } from './face-verify.js';
 
 mountSession();
 
@@ -63,6 +63,14 @@ fileInput.addEventListener('change', async () => {
 
   const files = [...fileInput.files].slice(0, 8);
   if (!files.length) return;
+
+  // Fail once, clearly, rather than repeating the same error per photograph.
+  try {
+    await ensureLibrary();
+  } catch (err) {
+    notify({ error: err.message });
+    return;
+  }
 
   results.hidden = false;
   const restore = busy(enrolBtn, 'Reading photographs');

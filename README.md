@@ -78,6 +78,28 @@ The token is scoped to one voter ID and one action, so a token earned for a card
 cannot be spent on a ballot. The check runs immediately before the action it
 guards, so the token is only ever seconds old.
 
+### If the page says the library did not load
+
+The matching library and its model weights are served straight out of
+`node_modules` rather than committed, so **pulling new code is not enough — run
+`npm install` and restart.** The server says which it is at startup:
+
+```
+  Face matching: ready
+```
+
+or, when it is not installed:
+
+```
+  Face matching: UNAVAILABLE
+
+  The face matching library is not installed (@vladmandic/face-api is missing).
+  Run "npm install" in the project folder, then restart the server.
+```
+
+`GET /api/face/assets` reports the same thing, and the enrolment page shows it
+in place of a vague "reload the page".
+
 ### Enrolling a face
 
 **No face is enrolled until you do this, and until then no camera check runs.**

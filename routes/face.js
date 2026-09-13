@@ -15,6 +15,7 @@ const rateLimit = require('express-rate-limit');
 
 const faces = require('../utils/faceTemplates');
 const faceToken = require('../utils/faceToken');
+const faceAssets = require('../utils/faceAssets');
 const { findByVoterId } = require('./voters');
 const { requireAuth } = require('../middleware/auth');
 const { clean, normalizeVoterId } = require('../utils/validate');
@@ -39,6 +40,22 @@ const enrolLimiter = rateLimit({
 });
 
 const showDistance = () => process.env.NODE_ENV !== 'production';
+
+/**
+ * GET /api/face/assets
+ * Whether the library and model weights are actually installed, so a page can
+ * report the real reason instead of "something did not load".
+ */
+router.get('/assets', (req, res) => {
+  const state = faceAssets.check();
+  res.json({
+    ok: state.ok,
+    library: state.library,
+    modelsMissing: state.missingModels.length,
+    reason: state.reason,
+    hint: state.hint,
+  });
+});
 
 /**
  * GET /api/face/status?voterId=...

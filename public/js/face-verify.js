@@ -26,9 +26,41 @@ let backendPromise = null;
 
 function faceapi() {
   if (!window.faceapi) {
-    throw new Error('The face matching library did not load. Reload the page and try again.');
+    // Deliberately terse: the real diagnosis needs a server round trip, so
+    // callers go through ensureLibrary() first and only hit this as a guard.
+    throw new Error(MISSING_LIBRARY);
   }
   return window.faceapi;
+}
+
+export const MISSING_LIBRARY = 'The face matching library did not load.';
+
+/**
+ * Turns a missing library into an actionable message.
+ *
+ * The library and its weights are served out of node_modules rather than
+ * committed, so the usual cause is a clone that pulled new code without
+ * re-running `npm install`. Asking the server which files it can actually see
+ * beats telling somebody to reload a page that will never fix it.
+ */
+export async function ensureLibrary() {
+  if (window.faceapi && window.faceapi.nets) return;
+
+  let detail = '';
+  try {
+    const res = await fetch('/api/face/assets', { headers: { accept: 'application/json' } });
+    if (res.ok) {
+      const state = await res.json();
+      if (!state.ok && state.reason) detail = ` ${state.reason} ${state.hint || ''}`.trimEnd();
+    }
+  } catch {
+    // Offer the generic message rather than swallowing the original failure.
+  }
+
+  if (!detail) {
+    detail = ' Check that the server is running and reachable, then reload the page.';
+  }
+  throw new Error(MISSING_LIBRARY + detail);
 }
 
 /**
@@ -112,6 +144,7 @@ export function createFaceSession({ video, onStatus = () => {} }) {
     }
 
     status('loading', 'Loading face matching models…');
+    await ensureLibrary();
     await loadModels();
 
     status('camera', 'Waiting for camera permission…');
@@ -295,6 +328,7 @@ function loadImageElement(url) {
  * does not hold exactly one clear face. Used by the enrolment page.
  */
 export async function describeImageFile(file) {
+  await ensureLibrary();
   const api = faceapi();
   await loadModels();
 

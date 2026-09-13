@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 
 const { requirePage, readSession } = require('./middleware/auth');
+const faceAssets = require('./utils/faceAssets');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -128,5 +129,14 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`\n  E-Voting portal running at http://localhost:${PORT}`);
-  console.log(`  Mail mode: ${String(process.env.MAIL_DRY_RUN).toLowerCase() === 'true' ? 'dry run (written to /outbox)' : 'live SMTP'}\n`);
+  console.log(`  Mail mode: ${String(process.env.MAIL_DRY_RUN).toLowerCase() === 'true' ? 'dry run (written to /outbox)' : 'live SMTP'}`);
+
+  // Served out of node_modules, so a pull without an install breaks this
+  // silently unless it is called out here.
+  const face = faceAssets.check();
+  console.log(`  Face matching: ${face.ok ? 'ready' : 'UNAVAILABLE'}`);
+  if (!face.ok) {
+    console.log(`\n  ${face.reason}\n  ${face.hint}`);
+  }
+  console.log('');
 });
