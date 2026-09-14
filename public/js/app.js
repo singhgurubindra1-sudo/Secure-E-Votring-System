@@ -3,8 +3,12 @@
 export const $ = (selector, scope = document) => scope.querySelector(selector);
 export const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
 
-/** JSON request wrapper. Bounces to sign-in when the session has expired. */
-export async function api(path, { method = 'GET', body, raw = false } = {}) {
+/**
+ * JSON request wrapper. Bounces to sign-in when the session has expired,
+ * unless the caller passes redirectOn401: false -- a page in the middle of
+ * something (the camera check) would rather report it than be yanked away.
+ */
+export async function api(path, { method = 'GET', body, raw = false, redirectOn401 = true } = {}) {
   const options = { method, headers: {}, credentials: 'same-origin' };
 
   if (body instanceof FormData) {
@@ -16,7 +20,7 @@ export async function api(path, { method = 'GET', body, raw = false } = {}) {
 
   const response = await fetch(path, options);
 
-  if (response.status === 401 && !location.pathname.startsWith('/?')) {
+  if (response.status === 401 && redirectOn401 && !location.pathname.startsWith('/?')) {
     location.href = '/?next=' + encodeURIComponent(location.pathname);
     throw new Error('Session ended');
   }
@@ -30,6 +34,7 @@ export async function api(path, { method = 'GET', body, raw = false } = {}) {
     const error = new Error(data.error || 'Something went wrong. Try again.');
     error.field = data.field;
     error.status = response.status;
+    error.sessionExpired = Boolean(data.sessionExpired);
     throw error;
   }
   return data;

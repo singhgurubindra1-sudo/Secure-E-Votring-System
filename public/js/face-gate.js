@@ -21,6 +21,7 @@ export function runFaceCheck({ voterId, purpose }) {
   const video = $('#faceVideo');
   const cancelBtn = $('#faceCancel');
   const retryBtn = $('#faceRetry');
+  const signInBtn = $('#faceSignIn');
 
   if (!dialog || !video) {
     return Promise.reject(new Error('The face check dialog is missing from this page.'));
@@ -38,6 +39,7 @@ export function runFaceCheck({ voterId, purpose }) {
     function teardown() {
       cancelBtn.removeEventListener('click', onCancel);
       retryBtn.removeEventListener('click', onRetry);
+      if (signInBtn) signInBtn.removeEventListener('click', onSignIn);
       dialog.removeEventListener('cancel', onCancel);
       if (session) session.stop();
       session = null;
@@ -65,9 +67,17 @@ export function runFaceCheck({ voterId, purpose }) {
 
     function onRetry() {
       retryBtn.hidden = true;
+      if (signInBtn) signInBtn.hidden = true;
       if (session) session.stop();
       session = null;
       attempt();
+    }
+
+    /** Comes back to this page rather than dumping the voter on the dashboard. */
+    function onSignIn() {
+      const back = location.pathname + location.search;
+      if (session) session.stop();
+      location.href = '/?next=' + encodeURIComponent(back);
     }
 
     async function attempt() {
@@ -85,6 +95,9 @@ export function runFaceCheck({ voterId, purpose }) {
         const result = await api('/api/face/verify', {
           method: 'POST',
           body: { voterId, descriptor, purpose },
+          // Handle an expired session here instead of being navigated away
+          // with the camera still open.
+          redirectOn401: false,
         });
 
         // No face on file: the server is not gating this voter, so there is
@@ -98,6 +111,17 @@ export function runFaceCheck({ voterId, purpose }) {
         // Let the confirmation land before the dialog disappears.
         setTimeout(() => finish(result.token), 450);
       } catch (err) {
+        if (session) session.stop();
+
+        if (err.sessionExpired) {
+          // Signing in again is the only thing that helps, but the camera
+          // check is left on screen so the voter keeps their place.
+          setState('failed', 'Your sign-in expired while the camera was open. Sign in again to finish, or try the check once more.');
+          if (signInBtn) signInBtn.hidden = false;
+          retryBtn.hidden = false;
+          return;
+        }
+
         // A wrong face or a second person is worth another try; a missing
         // camera is not, but offering the button costs nothing.
         setState(box.dataset.state === 'aborted' ? 'aborted' : 'failed', err.message);
@@ -107,9 +131,11 @@ export function runFaceCheck({ voterId, purpose }) {
 
     cancelBtn.addEventListener('click', onCancel);
     retryBtn.addEventListener('click', onRetry);
+    if (signInBtn) signInBtn.addEventListener('click', onSignIn);
     dialog.addEventListener('cancel', onCancel);
 
     retryBtn.hidden = true;
+    if (signInBtn) signInBtn.hidden = true;
     setState('idle', 'Starting the camera…');
     dialog.showModal();
     attempt();

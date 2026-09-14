@@ -1,7 +1,9 @@
 import { $, $$, api, busy, mountSession, escapeHtml, setFieldError, clearFieldErrors, toast } from './app.js';
 import { runFaceCheck } from './face-gate.js';
+import { warmUp } from './face-verify.js';
 
 mountSession();
+warmUp();
 
 const form = $('#lookupForm');
 const errorBox = form.querySelector('[data-form-error]');
@@ -43,7 +45,7 @@ form.addEventListener('submit', async (event) => {
   const restore = busy(form.querySelector('button[type="submit"]'), 'Checking the roll');
 
   try {
-    const data = await api('/api/vote/lookup', { method: 'POST', body: { voterId } });
+    const data = await api('/api/vote/lookup', { method: 'POST', body: { voterId }, redirectOn401: false });
     current = data;
     faceRequired = Boolean(data.faceRequired);
 
@@ -82,7 +84,13 @@ form.addEventListener('submit', async (event) => {
 
     credsDialog.showModal();
   } catch (err) {
-    if (err.field) setFieldError(form, err.field, err.message);
+    if (err.sessionExpired) {
+      const back = encodeURIComponent(location.pathname + location.search);
+      errorBox.innerHTML =
+        '<span>Your sign-in expired. <a href="/?next=' + back + '">Sign in again</a> to continue — ' +
+        'you will come back to this page.</span>';
+      errorBox.hidden = false;
+    } else if (err.field) setFieldError(form, err.field, err.message);
     else { errorBox.textContent = err.message; errorBox.hidden = false; }
   } finally {
     restore();

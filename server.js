@@ -75,10 +75,13 @@ app.get('/api/health', (req, res) => {
 
 // ------------------------------------------------------- Face matching assets
 const FACE_API_DIR = path.join(__dirname, 'node_modules', '@vladmandic', 'face-api');
-const oneDay = { maxAge: '1d', immutable: false };
+// The library build and the model weights are fixed for a given installed
+// version, so they are worth caching hard -- the recognition net alone is
+// 6.3 MB and re-fetching it on every visit is the slowest part of a check.
+const vendorCache = { maxAge: '30d', immutable: true };
 
-app.use('/vendor/face-api', express.static(path.join(FACE_API_DIR, 'dist'), oneDay));
-app.use('/models', express.static(path.join(FACE_API_DIR, 'model'), oneDay));
+app.use('/vendor/face-api', express.static(path.join(FACE_API_DIR, 'dist'), vendorCache));
+app.use('/models', express.static(path.join(FACE_API_DIR, 'model'), vendorCache));
 
 // -------------------------------------------------------------------- Pages
 const page = (file) => path.join(PUBLIC_DIR, file);

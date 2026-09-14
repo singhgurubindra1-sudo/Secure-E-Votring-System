@@ -147,6 +147,16 @@ the check; there is no import step by design.
 The browser reads the detector settings from the server, so these can be
 changed in `.env` and take effect on the next page load — no code edit.
 
+### If the sign-in expires mid-check
+
+The camera check no longer navigates away when the session runs out. The dialog
+stays open with the reason and two options: **Sign in again**, which returns to
+the same page afterwards, and **Try again**. The card and ballot pages report an
+expired session inline with a sign-in link rather than bouncing.
+
+An expired session and a face that does not match both answer HTTP 401, so the
+session case is marked with <code>sessionExpired: true</code> to tell them apart.
+
 ### How long the check takes
 
 The detector defaults were chosen by timing TinyFaceDetector over the six
@@ -161,6 +171,15 @@ sample faces that ship with the library:
 `416` was no more accurate than `320` and took nearly twice as long, and a
 score threshold of `0.5` started missing faces outright — which is what a
 headscarf, glasses or dim indoor light look like to the detector.
+
+The camera and the models now open together. The detector and landmark
+networks are about 540 KB and are all the detection loop needs; the recognition
+network is 6.3 MB and is only awaited at the moment a descriptor is wanted.
+Waiting for all three before asking for the camera left the panel blank for
+over five seconds. Both guarded pages also start the downloads on load, and the
+weights are served <code>immutable</code> with a 30-day cache, so the second
+visit costs nothing. Pressing the button to a live camera measures about
+**3.1 seconds** on a cold cache.
 
 The check also makes two passes rather than three: a cheap small-input pass
 counts faces until one holds steady, then one full pass measures it, and

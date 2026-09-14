@@ -35,7 +35,8 @@ const WATCH = { inputSize: 224, scoreThreshold: 0.25 };
 
 let settings = { ...DEFAULTS };
 let settingsPromise = null;
-let modelsPromise = null;
+let detectorPromise = null;
+let recognitionPromise = null;
 let backendPromise = null;
 let backendName = null;
 
@@ -155,19 +156,58 @@ function initBackend() {
   return backendPromise;
 }
 
-/** Loaded once per page and shared by every run. */
-function loadModels() {
-  if (modelsPromise) return modelsPromise;
+/**
+ * The models load in two groups, because they are needed at different moments.
+ *
+ * Detection needs the detector and landmark nets, which are about 540 KB
+ * together. Measuring a face needs the recognition net, which is 6.3 MB on its
+ * own. Waiting for all three before opening the camera meant staring at a
+ * blank panel while the big one downloaded; the camera now opens against the
+ * small pair while the big one arrives in the background, and it is only
+ * awaited at the moment a descriptor is actually wanted.
+ */
+function loadDetector() {
+  if (detectorPromise) return detectorPromise;
   const api = faceapi();
-  modelsPromise = Promise.all([initBackend(), loadSettings()]).then(() => Promise.all([
-    api.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-    api.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-    api.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-  ])).catch((err) => {
-    modelsPromise = null;
-    throw new Error('The face matching models could not be loaded. ' + (err.message || ''));
-  });
-  return modelsPromise;
+  detectorPromise = Promise.all([initBackend(), loadSettings()])
+    .then(() => Promise.all([
+      api.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+      api.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+    ]))
+    .catch((err) => {
+      detectorPromise = null;
+      throw new Error('The face detection models could not be loaded. ' + (err.message || ''));
+    });
+  return detectorPromise;
+}
+
+function loadRecognition() {
+  if (recognitionPromise) return recognitionPromise;
+  const api = faceapi();
+  recognitionPromise = initBackend()
+    .then(() => api.nets.faceRecognitionNet.loadFromUri(MODEL_URL))
+    .catch((err) => {
+      recognitionPromise = null;
+      throw new Error('The face matching model could not be loaded. ' + (err.message || ''));
+    });
+  return recognitionPromise;
+}
+
+/** Both groups, for callers that need a descriptor straight away. */
+function loadModels() {
+  return Promise.all([loadDetector(), loadRecognition()]);
+}
+
+/**
+ * Starts the downloads without waiting for them.
+ *
+ * Called as soon as a page that can run a check is opened, so the weights are
+ * usually in the browser cache by the time somebody presses the button.
+ */
+export function warmUp() {
+  if (!window.faceapi) return;
+  loadDetector().catch(() => {});
+  loadRecognition().catch(() => {});
 }
 
 function cameraError(err) {
@@ -203,19 +243,29 @@ export function createFaceSession({ video, onStatus = () => {} }) {
       throw new Error('This browser cannot open a camera. Try a recent Chrome, Edge, Firefox or Safari.');
     }
 
-    status('loading', 'Loading face matching models…');
     await ensureLibrary();
-    await loadModels();
 
-    status('camera', 'Waiting for camera permission…');
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
+    // Ask for the camera and fetch the detector at the same time. The
+    // permission prompt is the slow part for a person and the download is the
+    // slow part for the network; running them together spends one wait, not two.
+    status('camera', 'Opening the camera…');
+    const cameraReady = navigator.mediaDevices
+      .getUserMedia({
         video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
         audio: false,
+      })
+      .catch((err) => {
+        throw new Error(cameraError(err));
       });
-    } catch (err) {
-      throw new Error(cameraError(err));
-    }
+
+    // The big recognition model is not awaited here; capture() waits for it.
+    loadRecognition().catch(() => {});
+
+    const [openedStream] = await Promise.all([
+      cameraReady,
+      loadDetector().then(() => status('camera', 'Starting the camera…')),
+    ]);
+    stream = openedStream;
 
     video.srcObject = stream;
     await video.play().catch(() => {});
@@ -332,6 +382,11 @@ export function createFaceSession({ video, onStatus = () => {} }) {
       // the measurement come from the same frame, so nobody can slip in
       // between the two.
       status('reading', 'Reading your face…');
+      try {
+        await loadRecognition();
+      } catch (err) {
+        throw new Error(err.message);
+      }
       let results;
       try {
         const all = await api

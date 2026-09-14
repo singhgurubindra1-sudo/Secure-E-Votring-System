@@ -1,7 +1,9 @@
 import { $, api, busy, mountSession, escapeHtml, setFieldError, clearFieldErrors, toast } from './app.js';
 import { runFaceCheck } from './face-gate.js';
+import { warmUp } from './face-verify.js';
 
 mountSession();
+warmUp();
 
 let faceRequired = false;
 
@@ -35,6 +37,8 @@ function showFaceState(data) {
 }
 
 function notify({ error = '', success = '' } = {}) {
+  // textContent, so a message can never inject markup; handleError sets
+  // innerHTML itself for the one case that needs a link.
   errorBox.textContent = error;
   errorBox.hidden = !error;
   okBox.textContent = success;
@@ -62,6 +66,16 @@ function showPreview(voter) {
 function handleError(err) {
   preview.hidden = true;
   showFaceState(null);
+
+  if (err.sessionExpired) {
+    const back = encodeURIComponent(location.pathname + location.search);
+    errorBox.innerHTML =
+      '<span>Your sign-in expired. <a href="/?next=' + back + '">Sign in again</a> to continue — ' +
+      'you will come back to this page.</span>';
+    errorBox.hidden = false;
+    okBox.hidden = true;
+    return;
+  }
   if (err.field) {
     setFieldError(form, err.field, err.message);
     notify();
@@ -75,7 +89,7 @@ $('#verify').addEventListener('click', async (event) => {
   notify();
   const restore = busy(event.currentTarget, 'Checking');
   try {
-    const data = await api('/api/card/verify', { method: 'POST', body: payload() });
+    const data = await api('/api/card/verify', { method: 'POST', body: payload(), redirectOn401: false });
     faceRequired = Boolean(data.faceRequired);
     showPreview(data.voter);
     showFaceState(data);
@@ -99,7 +113,7 @@ form.addEventListener('submit', async (event) => {
   // by an earlier click -- the voter may have come straight here.
   let restore = busy(button, 'Checking details');
   try {
-    const check = await api('/api/card/verify', { method: 'POST', body });
+    const check = await api('/api/card/verify', { method: 'POST', body, redirectOn401: false });
     faceRequired = Boolean(check.faceRequired);
     showPreview(check.voter);
     showFaceState(check);

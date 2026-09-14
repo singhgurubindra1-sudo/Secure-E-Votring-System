@@ -50,7 +50,14 @@ function readSession(req) {
 function requireAuth(req, res, next) {
   const session = readSession(req);
   if (!session) {
-    return res.status(401).json({ ok: false, error: 'Your session has ended. Sign in again.' });
+    return res.status(401).json({
+      ok: false,
+      // Marks this as an expired session rather than any other 401 -- a face
+      // that does not match also answers 401, and the two need different
+      // handling in the browser.
+      sessionExpired: true,
+      error: 'Your session has ended. Sign in again.',
+    });
   }
   req.user = session;
   next();
