@@ -1,0 +1,22 @@
+{
+  "name": "Secure E-Voting portal",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+
+  // Declaring the port here registers the forward when the Codespace starts,
+  // so it does not depend on the Ports panel noticing the server by itself.
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "E-Voting portal",
+      "onAutoForward": "openBrowser"
+    }
+  },
+
+  "postCreateCommand": "npm install && cp -n .env.example .env || true",
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint"]
+    }
+  }
+}

@@ -13,6 +13,10 @@ const faceAssets = require('./utils/faceAssets');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
+// Bind every interface by default. Node would pick '::' on its own, but
+// Codespaces and Docker only notice a forwarded port when the listening
+// socket is unambiguous, and a container with IPv6 off makes '::' one.
+const HOST = process.env.HOST || '0.0.0.0';
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
 if (!process.env.JWT_SECRET) {
@@ -138,8 +142,23 @@ app.use((err, req, res, next) => {
   res.status(500).json({ ok: false, error: 'Something went wrong on our side. Try again.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n  E-Voting portal running at http://localhost:${PORT}`);
+/**
+ * Inside a Codespace, `localhost` is the container, not the machine holding the
+ * browser, so printing it sends people to a dead address. GitHub sets these two
+ * variables in every Codespace, so the real forwarded URL can be printed instead.
+ */
+function publicUrl() {
+  const name = process.env.CODESPACE_NAME;
+  const domain = process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN;
+  if (name && domain) return `https://${name}-${PORT}.${domain}`;
+  return `http://localhost:${PORT}`;
+}
+
+app.listen(PORT, HOST, () => {
+  console.log(`\n  E-Voting portal running at ${publicUrl()}`);
+  if (process.env.CODESPACE_NAME) {
+    console.log(`  (inside the Codespace itself: http://localhost:${PORT})`);
+  }
   console.log(`  Mail mode: ${String(process.env.MAIL_DRY_RUN).toLowerCase() === 'true' ? 'dry run (written to /outbox)' : 'live SMTP'}`);
 
   // Served out of node_modules, so a pull without an install breaks this
