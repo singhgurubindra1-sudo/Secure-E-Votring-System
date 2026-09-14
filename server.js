@@ -83,6 +83,14 @@ const vendorCache = { maxAge: '30d', immutable: true };
 app.use('/vendor/face-api', express.static(path.join(FACE_API_DIR, 'dist'), vendorCache));
 app.use('/models', express.static(path.join(FACE_API_DIR, 'model'), vendorCache));
 
+// three.js for the forest backdrop. The whole build directory is served
+// because three.module.js imports three.core.js beside it by relative path,
+// and script-src is 'self' -- a CDN copy would be refused.
+app.use(
+  '/vendor/three',
+  express.static(path.join(__dirname, 'node_modules', 'three', 'build'), vendorCache)
+);
+
 // -------------------------------------------------------------------- Pages
 const page = (file) => path.join(PUBLIC_DIR, file);
 

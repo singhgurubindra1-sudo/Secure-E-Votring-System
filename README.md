@@ -213,6 +213,32 @@ challenged — switch to `all` once everyone on the roll has a face on file.
   enrol or delete any voter's face, because the portal has no admin role yet.
   That is the most important gap to close before this is used for anything real.
 
+## Forest backdrop
+
+Every page renders a foggy conifer forest behind it in WebGL, and leaving a
+page pushes the camera forward through the trees before the next one loads.
+
+It is **procedural** — there are no model or texture files. The trees are
+tapered cylinders with stacked cones, the mist is canvas-drawn radial
+gradients on drifting planes, and the depth comes from exponential fog. The
+whole illusion rests on one relationship: the air is much lighter than the
+trees, so every trunk reads as a silhouette and the fog alone separates the
+near ranks from the far ones. That is atmospheric rather than photorealistic,
+and it costs no downloaded assets beyond three.js itself.
+
+Three things matter as much as how it looks:
+
+- **It stops while the face check runs.** TensorFlow.js wants the same GPU,
+  and the camera check is the part that has to stay quick.
+- **It respects `prefers-reduced-motion`** — one still frame, no animation.
+- **It can be switched off**, from the button in the bottom corner, and the
+  choice is remembered per browser. Everything forest-related is scoped to
+  `[data-forest="on"]`, so switching off — or a browser without WebGL — gets
+  the flat design untouched.
+
+Panels over the scene become frosted glass and headings get a scrim, because
+readability wins over atmosphere on a screen somebody has to fill in.
+
 ## Layout
 
 ```

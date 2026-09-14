@@ -568,3 +568,223 @@ dialog::backdrop { background: rgba(20, 27, 45, .52); backdrop-filter: blur(2px)
 @media (max-width: 560px) {
   .facecheck__reticle { inset: 10% 18%; }
 }
+
+/* ============================================================================
+   Forest backdrop
+   A WebGL canvas sits behind everything. The panels above it become frosted
+   glass so text keeps its contrast against moving trees -- readability wins
+   over atmosphere every time, because people have to fill these forms in.
+   Everything here is scoped to [data-forest="on"], so a browser without
+   WebGL, or a voter who switched it off, gets the flat design untouched.
+   ========================================================================== */
+
+#forest {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: -2;
+  background: #6f7d84;
+}
+
+/* Depth haze: darker at the edges, so the centre of the frame holds the eye
+   and the corners recede. */
+[data-forest="on"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(130% 95% at 50% 40%, rgba(18, 24, 22, 0) 45%, rgba(14, 19, 18, .30) 100%),
+    linear-gradient(to bottom, rgba(12, 17, 16, .14), rgba(12, 17, 16, 0) 40%, rgba(10, 14, 13, .22));
+}
+
+[data-forest="on"] body { background: transparent; }
+
+/* --------------------------------------------------------- frosted surfaces */
+
+[data-forest="on"] .panel,
+[data-forest="on"] .card,
+[data-forest="on"] .split__form {
+  background: rgba(255, 255, 255, .90);
+  backdrop-filter: blur(14px) saturate(115%);
+  -webkit-backdrop-filter: blur(14px) saturate(115%);
+  border: 1px solid rgba(255, 255, 255, .55);
+  box-shadow: 0 2px 6px rgba(8, 12, 11, .18), 0 26px 60px -30px rgba(6, 10, 9, .75);
+}
+
+[data-forest="on"] .topbar {
+  background: rgba(19, 26, 24, .62);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border-bottom: 1px solid rgba(255, 255, 255, .12);
+}
+
+[data-forest="on"] .topbar .mark__text,
+[data-forest="on"] .topbar__user { color: #eef2f0; }
+/* The signed-in name is violet by default, which disappears on dark glass. */
+[data-forest="on"] .topbar__user strong { color: #fff; }
+[data-forest="on"] .topbar .mark__text span,
+[data-forest="on"] .topbar__user span { color: #b9c6c1; }
+[data-forest="on"] .topbar .mark__glyph { border-color: #eef2f0; }
+[data-forest="on"] .btn--quiet { color: #cfd9d4; }
+[data-forest="on"] .btn--quiet:hover { color: #fff; }
+
+/* Text that sits directly on the scene rather than on a panel. Everything
+   here would otherwise be dark ink on dark trees -- the readability trap of
+   putting a photograph behind a working screen. */
+[data-forest="on"] .pagehead h1,
+[data-forest="on"] .crumb {
+  color: #f4f8f6;
+  text-shadow: 0 1px 3px rgba(8, 12, 11, .7), 0 0 26px rgba(8, 12, 11, .5);
+}
+
+[data-forest="on"] .pagehead p,
+[data-forest="on"] .shell > p,
+[data-forest="on"] .ballot__caption span {
+  color: #dde6e2;
+  text-shadow: 0 1px 3px rgba(8, 12, 11, .75);
+}
+
+/* A scrim behind the heading block, so the type never has to fight a trunk. */
+[data-forest="on"] .pagehead {
+  position: relative;
+}
+
+[data-forest="on"] .pagehead::before {
+  content: '';
+  position: absolute;
+  inset: -18px -26px -12px -26px;
+  z-index: -1;
+  border-radius: var(--r-lg);
+  background: radial-gradient(90% 120% at 0% 40%, rgba(10, 15, 14, .62), rgba(10, 15, 14, 0) 78%);
+  pointer-events: none;
+}
+
+[data-forest="on"] .crumb:hover { color: #fff; }
+
+[data-forest="on"] .ballot__row {
+  background: rgba(255, 255, 255, .92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+[data-forest="on"] .table-wrap,
+[data-forest="on"] dialog {
+  background: rgba(255, 255, 255, .95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ------------------------------------------------------ leaving the page */
+
+/* The fly-through animates the camera; this dissolves the content over it so
+   the two read as one movement into the trees. */
+[data-forest="on"][data-leaving="true"] .shell,
+[data-forest="on"][data-leaving="true"] .topbar,
+[data-forest="on"][data-leaving="true"] .split {
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity .5s ease, transform .6s cubic-bezier(.4, 0, .2, 1);
+}
+
+/* Arriving: content settles while the fog clears. */
+[data-forest="on"] .shell,
+[data-forest="on"] .split {
+  animation: forest-arrive .7s cubic-bezier(.2, .7, .2, 1) both;
+}
+
+@keyframes forest-arrive {
+  from { opacity: 0; transform: translateY(10px) scale(.995); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ------------------------------------------------------------ the off switch */
+
+.forest-toggle {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #e7edea;
+  background: rgba(19, 26, 24, .66);
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 999px;
+  padding: 7px 13px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.forest-toggle:hover { background: rgba(19, 26, 24, .82); }
+.forest-toggle:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+[data-forest="off"] .forest-toggle {
+  color: var(--muted);
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+/* Nothing moves, and nothing dissolves, for anyone who asked for that. */
+@media (prefers-reduced-motion: reduce) {
+  [data-forest="on"] .shell,
+  [data-forest="on"] .split { animation: none; }
+  [data-forest="on"][data-leaving="true"] .shell,
+  [data-forest="on"][data-leaving="true"] .topbar,
+  [data-forest="on"][data-leaving="true"] .split { transition: none; opacity: 1; transform: none; }
+}
+
+/* The sign-in page is two opaque half-screen panels by default, which would
+   cover the scene completely. Over the forest both columns go transparent and
+   the form becomes a card floating in the mist. */
+[data-forest="on"] .split__brand {
+  background: none;
+}
+
+/* Just enough gradient behind the headline for the white type to hold. */
+[data-forest="on"] .split__brand::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(100deg, rgba(11, 16, 15, .70) 0%, rgba(11, 16, 15, .30) 45%, rgba(11, 16, 15, .06) 72%, rgba(11, 16, 15, 0) 88%);
+  pointer-events: none;
+}
+
+[data-forest="on"] .split__form {
+  background: none;
+  padding: 44px 40px;
+}
+
+/* The bare wrapper inside .split__form is the card. */
+[data-forest="on"] .split__form > div {
+  width: 100%;
+  max-width: 420px;
+  padding: 30px 30px 34px;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, .93);
+  backdrop-filter: blur(18px) saturate(115%);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  border: 1px solid rgba(255, 255, 255, .6);
+  box-shadow: 0 2px 8px rgba(8, 12, 11, .22), 0 34px 70px -32px rgba(6, 10, 9, .8);
+}
+
+[data-forest="on"] .split__brand h1 {
+  text-shadow: 0 2px 18px rgba(6, 10, 9, .8), 0 1px 3px rgba(6, 10, 9, .9);
+}
+
+[data-forest="on"] .split__lead,
+[data-forest="on"] .split__facts { text-shadow: 0 1px 3px rgba(6, 10, 9, .85); }
+
+/* The fingerprint line-art belonged to the flat navy panel; over trees it just
+   reads as stray geometry. */
+[data-forest="on"] .thumbmark { display: none; }
