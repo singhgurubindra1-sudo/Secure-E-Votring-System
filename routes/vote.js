@@ -8,6 +8,7 @@ const store = require('../utils/store');
 const { findByVoterId } = require('./voters');
 const { requireAuth } = require('../middleware/auth');
 const faces = require('../utils/faceTemplates');
+const supabase = require('../utils/supabaseMirror');
 const faceToken = require('../utils/faceToken');
 const { clean, normalizeVoterId, ageOn } = require('../utils/validate');
 
@@ -141,24 +142,40 @@ router.post('/cast', limiter, async (req, res, next) => {
     }
 
     const receipt = crypto.randomBytes(9).toString('hex').toUpperCase().replace(/(.{6})(?=.)/g, '$1-');
+    const ballot = {
+      voterKey: fingerprint(voter.voterId),
+      candidateId: candidate.id,
+      district: voter.district,
+      state: voter.state,
+      receipt,
+      castAt: new Date().toISOString(),
+    };
 
-    await store.update('votes', (list) => {
-      if (list.some((v) => v.voterKey === fingerprint(voter.voterId))) return list;
-      return [...list, {
-        voterKey: fingerprint(voter.voterId),
-        candidateId: candidate.id,
-        district: voter.district,
-        state: voter.state,
-        receipt,
-        castAt: new Date().toISOString(),
-      }];
+    // store.update runs its mutator under a per-file lock, so this guard --
+    // not the hasVoted() check above -- is what actually makes double voting
+    // impossible. hasVoted() only exists to answer with a clean 409 before any
+    // work is done.
+    const stored = await store.update('votes', (list) => {
+      if (list.some((v) => v.voterKey === ballot.voterKey)) return list;
+      return [...list, ballot];
     });
+
+    // If the guard fired, this request lost a race with an identical one and
+    // nothing was written. Returning 201 with a receipt for a ballot that does
+    // not exist would hand the voter a receipt they could never redeem.
+    if (!stored.some((v) => v.receipt === receipt)) {
+      return res.status(409).json({ ok: false, error: 'A vote has already been recorded for this voter ID.' });
+    }
+
+    // The ballot is safely on disk. Mirroring is a copy and cannot fail the
+    // request; supabaseMirror never throws and logs its own outcome.
+    await supabase.mirrorVote(ballot);
 
     res.status(201).json({
       ok: true,
       receipt,
       candidate: { id: candidate.id, name: candidate.name, party: candidate.party },
-      castAt: new Date().toISOString(),
+      castAt: ballot.castAt,
     });
   } catch (err) {
     next(err);

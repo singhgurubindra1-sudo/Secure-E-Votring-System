@@ -71,8 +71,13 @@ function emptyDir(dir, label, keep = []) {
 if (want.votes) emptyJson('votes.json', '[]', 'ballots');
 if (want.users) emptyJson('users.json', '[]', 'portal accounts');
 if (want.tickets) emptyJson('tickets.json', '[]', 'support tickets');
-if (want.uploads) emptyDir(path.join(ROOT, 'uploads'), 'ticket uploads', ['.gitkeep']);
-if (want.outbox) emptyDir(path.join(ROOT, 'outbox'), 'dry-run mail');
+// Same overrides the server honours, so reset clears the directories actually
+// in use rather than the repository's defaults.
+const uploadDir = process.env.UPLOAD_DIR ? path.resolve(process.env.UPLOAD_DIR) : path.join(ROOT, 'uploads');
+const outboxDir = process.env.OUTBOX_DIR ? path.resolve(process.env.OUTBOX_DIR) : path.join(ROOT, 'outbox');
+
+if (want.uploads) emptyDir(uploadDir, 'ticket uploads', ['.gitkeep']);
+if (want.outbox) emptyDir(outboxDir, 'dry-run mail');
 
 if (want.faces) {
   emptyJson('face-templates.json', '{}', 'face templates');

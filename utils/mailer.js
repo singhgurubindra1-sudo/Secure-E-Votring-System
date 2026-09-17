@@ -12,7 +12,11 @@ const fs = require('fs/promises');
 const path = require('path');
 const nodemailer = require('nodemailer');
 
-const OUTBOX = path.join(__dirname, '..', 'outbox');
+// Overridable for the same reason DATA_DIR is: a test run, or a second
+// instance, must not write into the outbox a developer is reading.
+const OUTBOX = process.env.OUTBOX_DIR
+  ? path.resolve(process.env.OUTBOX_DIR)
+  : path.join(__dirname, '..', 'outbox');
 let cached = null;
 
 function dryRun() {

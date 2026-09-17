@@ -55,6 +55,12 @@ async function seedDataDir() {
   const candidates = await fs.readFile(path.join(REPO_DATA, 'candidates.json'), 'utf8');
   await fs.writeFile(path.join(dir, 'candidates.json'), candidates, 'utf8');
 
+  // Each server gets its own outbox and uploads too. Without this, test files
+  // run concurrently and every one of them asserts on the contents of the same
+  // two shared directories.
+  await fs.mkdir(path.join(dir, 'outbox'), { recursive: true });
+  await fs.mkdir(path.join(dir, 'uploads'), { recursive: true });
+
   for (const file of ['users.json', 'tickets.json', 'votes.json']) {
     await fs.writeFile(path.join(dir, file), '[]\n', 'utf8');
   }
@@ -75,6 +81,8 @@ async function startServer(env = {}) {
       PORT: String(port),
       NODE_ENV: 'test',
       DATA_DIR: dataDir,
+      OUTBOX_DIR: path.join(dataDir, 'outbox'),
+      UPLOAD_DIR: path.join(dataDir, 'uploads'),
       JWT_SECRET: 'end-to-end-test-secret-long-enough-to-pass',
       SESSION_HOURS: '1',
       MAIL_DRY_RUN: 'true',
@@ -115,7 +123,15 @@ async function startServer(env = {}) {
     await fs.rm(dataDir, { recursive: true, force: true });
   }
 
-  return { base, port, dataDir, stop, logs };
+  return {
+    base,
+    port,
+    dataDir,
+    outboxDir: path.join(dataDir, 'outbox'),
+    uploadDir: path.join(dataDir, 'uploads'),
+    stop,
+    logs,
+  };
 }
 
 /** A fetch bound to the server that carries the session cookie across calls. */

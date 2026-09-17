@@ -16,7 +16,6 @@ const path = require('node:path');
 const { startServer, makeClient } = require('./helpers/server');
 const { extractText } = require('./helpers/pdf');
 
-const ROOT = path.join(__dirname, '..');
 const INBOX = 'support-inbox@example.test';
 
 const ARNAB = {
@@ -33,14 +32,9 @@ const PNG = Buffer.from(
 test('voter card and ticket flows over HTTP', async (t) => {
   const server = await startServer();
   const client = makeClient(server.base);
-  const createdUploads = [];
 
   t.after(async () => {
     await server.stop();
-    await fs.rm(path.join(ROOT, 'outbox'), { recursive: true, force: true });
-    for (const file of createdUploads) {
-      await fs.rm(path.join(ROOT, 'uploads', file), { force: true });
-    }
   });
 
   await t.test('rejects card download before sign-in', async () => {
@@ -158,7 +152,7 @@ test('voter card and ticket flows over HTTP', async (t) => {
   });
 
   await t.test('writes the message to the outbox in dry-run mode', async () => {
-    const body = await fs.readFile(path.join(ROOT, 'outbox', `${reference}.txt`), 'utf8');
+    const body = await fs.readFile(path.join(server.outboxDir, `${reference}.txt`), 'utf8');
     assert.match(body, new RegExp(`^To: ${INBOX}$`, 'm'));
     assert.match(body, /^Reply-To: priyanka@example\.test$/m);
     assert.match(body, /Phone: 9876543210/);
@@ -167,11 +161,10 @@ test('voter card and ticket flows over HTTP', async (t) => {
   });
 
   await t.test('stores the upload under a generated name, not the client name', async () => {
-    const files = (await fs.readdir(path.join(ROOT, 'uploads'))).filter((f) => f !== '.gitkeep');
-    createdUploads.push(...files);
+    const files = (await fs.readdir(server.uploadDir)).filter((f) => f !== '.gitkeep');
     assert.equal(files.length, 1);
     assert.match(files[0], /^\d+-[0-9a-f]{16}\.png$/);
-    assert.deepEqual(await fs.readFile(path.join(ROOT, 'uploads', files[0])), PNG);
+    assert.deepEqual(await fs.readFile(path.join(server.uploadDir, files[0])), PNG);
   });
 
   await t.test('lists the ticket for the account that raised it', async () => {

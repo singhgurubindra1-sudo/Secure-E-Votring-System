@@ -64,14 +64,44 @@ if (!verdict.ok) {
 notes.push(`Enabled    ${enabled ? 'yes' : 'no (the portal will not contact Supabase)'}`);
 
 // -------------------------------------------------------------------- output
-console.log('\n  Supabase configuration\n');
-notes.forEach((line) => console.log('  ' + line));
+// --------------------------------------------------------------- live probe
+// Settings that merely look right are not worth much: a revoked key, a paused
+// project or a missing table all pass every check above. This actually asks.
+async function probe() {
+  const mirror = require('../utils/supabaseMirror');
 
-if (problems.length) {
-  console.log('\n  Problems:');
-  problems.forEach((line) => console.log('  - ' + line));
-  console.log('');
-  process.exit(1);
+  if (!mirror.enabled()) {
+    return [`Reachability  not tested (${mirror.disabledReason()})`];
+  }
+
+  const lines = [];
+  for (const table of ['votes', 'tickets']) {
+    const result = await mirror.ping(table);
+    if (result.ok) {
+      lines.push(`public.${table.padEnd(8)} reachable`);
+    } else {
+      lines.push(`public.${table.padEnd(8)} FAILED - ${result.error}`);
+      problems.push(`Could not read public.${table}: ${result.error}`);
+    }
+  }
+  return lines;
 }
 
-console.log('\n  Looks good.\n');
+(async () => {
+  console.log('\n  Supabase configuration\n');
+  notes.forEach((line) => console.log('  ' + line));
+
+  if (verdict.ok && url) {
+    console.log('');
+    (await probe()).forEach((line) => console.log('  ' + line));
+  }
+
+  if (problems.length) {
+    console.log('\n  Problems:');
+    problems.forEach((line) => console.log('  - ' + line));
+    console.log('');
+    process.exit(1);
+  }
+
+  console.log('\n  Looks good.\n');
+})();

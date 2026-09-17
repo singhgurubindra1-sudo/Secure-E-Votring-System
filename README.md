@@ -280,6 +280,63 @@ Panels over the sign-in hall become frosted glass and the headline gets a
 scrim, because readability wins over atmosphere on a screen somebody has to
 fill in.
 
+## Supabase mirror
+
+Votes and tickets are copied into Postgres on Supabase. **The JSON file store
+stays authoritative.** The mirror is written after the real write has already
+succeeded, and it is deliberately incapable of failing a request: if Supabase
+is slow, down, misconfigured or answering nonsense, a voter still casts their
+ballot and still gets their receipt. The tests prove that rather than assuming
+it -- a vote is cast against a Supabase that returns 500, one that hangs past
+the timeout, and one that is not listening at all.
+
+Turn it on in `.env`:
+
+```
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<the key marked "secret">
+SUPABASE_ENABLED=true
+```
+
+Then check it, which prints no key and actually reads both tables:
+
+```bash
+npm run check-supabase
+```
+
+The boot banner says which state it is in, next to the mail and face lines.
+
+### Why the service role key
+
+Both tables have row level security enabled with **no policies**, so the
+publishable (anon) key reads nothing at all from either of them. That is the
+intended posture: a browser has no business reading ballots or complainants'
+phone numbers. Only the service role key can reach them, which is exactly why
+it must never leave the server. `npm run check-supabase` names this mistake
+explicitly, because reaching for the wrong key looks like an empty database
+rather than an auth failure.
+
+### What is in the rows
+
+`votes` carries `voter_key` -- an HMAC-SHA256 of the normalised voter ID -- and
+no other trace of the voter. No name, no voter ID, no account id, no email, no
+IP. A `CHECK` refuses anything that is not a 64-character hex digest, so a raw
+voter ID cannot be written into that column by accident, and a test asserts
+that no column beyond the schema is ever sent.
+
+`tickets` keeps the contact details on purpose: a complaint has to be
+answerable. Attachments are stored as metadata only -- original name, stored
+name, MIME type, size -- never the absolute path on disk.
+
+The schema lives in `supabase/migrations/`, so it is in version control rather
+than only in the hosted project.
+
+### No client library
+
+The mirror talks to PostgREST over plain `fetch`. An insert is one POST, so
+`@supabase/supabase-js` would add megabytes of dependency to save nothing, and
+this project already avoids carrying code it does not need.
+
 ## Layout
 
 ```
@@ -296,6 +353,7 @@ utils/
   validate.js          normalisation and validation helpers
   mailer.js            ticket email composition and delivery
   voterCardPdf.js      voter card PDF drawing
+  supabaseMirror.js    copies votes and tickets to Supabase; never throws
   faceTemplates.js     descriptor storage, distance matching, card photos
   faceToken.js         short-lived proof that a face check passed
   imageCheck.js        PNG/JPEG validation before pdfkit sees an image
@@ -309,7 +367,7 @@ public/                pages, stylesheet, page scripts
   js/scene-mount.js    picks the scene for the page and offers the switch
 data/                  JSON data files (biometric files are gitignored)
 tests/                 node:test suites and image fixtures
-scripts/               import-voters.js, reset.js
+scripts/               import-voters.js, reset.js, check-supabase.js
 ```
 
 ## Resetting between tests

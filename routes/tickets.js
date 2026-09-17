@@ -7,6 +7,7 @@ const express = require('express');
 const multer = require('multer');
 const rateLimit = require('express-rate-limit');
 
+const supabase = require('../utils/supabaseMirror');
 const store = require('../utils/store');
 const { sendTicket } = require('../utils/mailer');
 const { requireAuth } = require('../middleware/auth');
@@ -15,7 +16,12 @@ const { clean, isEmail, normalizePhone } = require('../utils/validate');
 const router = express.Router();
 router.use(requireAuth);
 
-const UPLOAD_DIR = path.join(__dirname, '..', 'uploads');
+// Overridable for the same reason DATA_DIR is: concurrent test files each
+// asserting on the contents of one shared uploads/ directory cannot both be
+// right.
+const UPLOAD_DIR = process.env.UPLOAD_DIR
+  ? path.resolve(process.env.UPLOAD_DIR)
+  : path.join(__dirname, '..', 'uploads');
 const MAX_FILES = 10;
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
@@ -121,14 +127,16 @@ router.post('/', limiter, handleUpload, async (req, res, next) => {
     await sendTicket(ticket);
 
     // Persist without the absolute disk path.
-    await store.update('tickets', (list) => [
-      ...list,
-      {
-        ...ticket,
-        attachments: ticket.attachments.map(({ storedPath, ...rest }) => rest),
-        status: 'open',
-      },
-    ]);
+    const saved = {
+      ...ticket,
+      attachments: ticket.attachments.map(({ storedPath, ...rest }) => rest),
+      status: 'open',
+    };
+    await store.update('tickets', (list) => [...list, saved]);
+
+    // Mirrored from the saved shape, so the copy in Supabase carries exactly
+    // what is on disk and not the disk path. Cannot fail the request.
+    await supabase.mirrorTicket(saved);
 
     res.status(201).json({
       ok: true,

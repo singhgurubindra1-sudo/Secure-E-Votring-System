@@ -10,6 +10,7 @@ const rateLimit = require('express-rate-limit');
 
 const { requirePage, readSession } = require('./middleware/auth');
 const faceAssets = require('./utils/faceAssets');
+const supabase = require('./utils/supabaseMirror');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -159,6 +160,11 @@ app.listen(PORT, HOST, () => {
     console.log(`  (inside the Codespace itself: http://localhost:${PORT})`);
   }
   console.log(`  Mail mode: ${String(process.env.MAIL_DRY_RUN).toLowerCase() === 'true' ? 'dry run (written to /outbox)' : 'live SMTP'}`);
+
+  // Says whether ballots and tickets are being copied to Supabase. Off is a
+  // perfectly good state -- the file store is authoritative either way -- but
+  // it should never be a surprise.
+  console.log(`  Supabase mirror: ${supabase.enabled() ? 'on' : `off (${supabase.disabledReason()})`}`);
 
   // Served out of node_modules, so a pull without an install breaks this
   // silently unless it is called out here.
