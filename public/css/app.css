@@ -2,20 +2,38 @@
 
 /* ============================================================================
    Secure E-Voting portal
-   Palette takes its one bold note from indelible election ink (violet) set
-   against ballot-paper greys and a deep navy used for official surfaces.
+   Dressed as a public service rather than a product: an official navy for
+   surfaces and actions, the flag's saffron and green kept for the tricolour
+   rule and nothing else, and indelible election ink held back for the one
+   thing it means -- a mark on a ballot.
    ========================================================================== */
 
 :root {
-  --ink: #141b2d;
-  --ink-2: #2a3352;
-  --violet: #5b2e8c;
-  --violet-deep: #40206a;
-  --violet-soft: #f0eaf8;
-  --paper: #f2f1f6;
+  --ink: #16202e;
+  --ink-2: #2a3446;
+
+  /* Official navy. Primary actions, links, focus. */
+  --gov: #1a4480;
+  --gov-deep: #0f2d5c;
+  --gov-soft: #e9eff8;
+  --navy: #112e51;
+  --navy-deep: #0a1f3c;
+
+  /* The flag. Used as an accent rule and an emblem, never as body colour. */
+  --saffron: #ff9933;
+  --green: #138808;
+  --chakra: #000080;
+  /* Saffron is far too light to set type in. This is the same hue taken down
+     to where it passes contrast on white, for the one word that needs it. */
+  --saffron-ink: #8f4a05;
+
+  /* Indelible ink: the ballot mark, and nothing else. */
+  --ink-violet: #5b2e8c;
+
+  --paper: #f4f5f7;
   --surface: #ffffff;
-  --line: #dcd9e5;
-  --line-soft: #e9e7ef;
+  --line: #d4d9e0;
+  --line-soft: #e6e9ee;
   --muted: #6b7280;
   --verify: #0f6e4f;
   --verify-soft: #e6f2ed;
@@ -50,10 +68,10 @@ body {
 
 h1, h2, h3 { font-family: var(--serif); font-weight: 600; letter-spacing: -.01em; margin: 0; }
 p { margin: 0; }
-a { color: var(--violet); }
+a { color: var(--gov); }
 
 :focus-visible {
-  outline: 2px solid var(--violet);
+  outline: 2px solid var(--gov);
   outline-offset: 2px;
   border-radius: var(--r-sm);
 }
@@ -63,45 +81,6 @@ a { color: var(--violet); }
   background: var(--ink); color: #fff; padding: 10px 16px; z-index: 99;
 }
 .skip:focus { left: 12px; top: 12px; }
-
-/* ------------------------------------------------------------------ wordmark */
-.mark { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
-.mark__glyph {
-  width: 30px; height: 30px; flex: none;
-  border-radius: 50%;
-  border: 1.5px solid currentColor;
-  display: grid; place-items: center;
-  position: relative;
-}
-.mark__glyph::before,
-.mark__glyph::after {
-  content: ''; position: absolute; border-radius: 50%; border: 1.5px solid currentColor;
-}
-.mark__glyph::before { inset: 5px; }
-.mark__glyph::after { inset: 10px; background: currentColor; border: 0; }
-.mark__text { font-family: var(--serif); font-weight: 600; font-size: 16px; letter-spacing: -.01em; }
-.mark__text span { display: block; font-family: var(--sans); font-size: 11px; font-weight: 400; color: var(--muted); letter-spacing: .02em; }
-
-/* -------------------------------------------------------------------- header */
-.topbar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
-  position: sticky; top: 0; z-index: 20;
-}
-.topbar__inner {
-  max-width: 1120px; margin: 0 auto; padding: 14px 24px;
-  display: flex; align-items: center; gap: 20px;
-}
-.topbar__spacer { margin-left: auto; }
-.topbar__user { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 10px; }
-.topbar__user strong { color: var(--ink); font-weight: 600; }
-
-.crumb {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 13px; color: var(--muted); text-decoration: none;
-  padding: 5px 0;
-}
-.crumb:hover { color: var(--violet); }
 
 /* --------------------------------------------------------------------- shell */
 .shell { max-width: 1120px; margin: 0 auto; padding: 40px 24px 80px; }
@@ -121,8 +100,6 @@ a { color: var(--violet); }
   display: flex; flex-direction: column; justify-content: space-between;
   position: relative; overflow: hidden;
 }
-.split__brand .mark { color: #fff; }
-.split__brand .mark__text span { color: #9a93b5; }
 
 .split__lead { position: relative; z-index: 2; max-width: 30ch; }
 .split__lead h1 { font-size: clamp(30px, 3.6vw, 44px); line-height: 1.15; }
@@ -131,7 +108,7 @@ a { color: var(--violet); }
 .thumbmark {
   position: absolute; right: -90px; bottom: -70px;
   width: 420px; height: 420px; opacity: .5; z-index: 1;
-  color: var(--violet);
+  color: var(--gov);
 }
 
 .split__facts { position: relative; z-index: 2; display: grid; gap: 14px; font-size: 13px; color: #b6aecd; }
@@ -171,7 +148,7 @@ textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
 
 input:hover, select:hover, textarea:hover { border-color: #c5c1d3; }
 input:focus, select:focus, textarea:focus {
-  outline: none; border-color: var(--violet);
+  outline: none; border-color: var(--gov);
   box-shadow: 0 0 0 3px rgba(91, 46, 140, .14);
 }
 input[aria-invalid='true'], textarea[aria-invalid='true'] { border-color: var(--alert); }
@@ -193,8 +170,8 @@ input[aria-invalid='true']:focus, textarea[aria-invalid='true']:focus { box-shad
 }
 .btn:disabled { opacity: .55; cursor: not-allowed; }
 
-.btn--primary { background: var(--violet); color: #fff; }
-.btn--primary:hover:not(:disabled) { background: var(--violet-deep); }
+.btn--primary { background: var(--gov); color: #fff; }
+.btn--primary:hover:not(:disabled) { background: var(--gov-deep); }
 
 .btn--dark { background: var(--ink); color: #fff; }
 .btn--dark:hover:not(:disabled) { background: var(--ink-2); }
@@ -203,7 +180,7 @@ input[aria-invalid='true']:focus, textarea[aria-invalid='true']:focus { box-shad
 .btn--ghost:hover:not(:disabled) { border-color: #bdb8cd; background: #fafafc; }
 
 .btn--quiet { background: none; color: var(--muted); padding: 8px 10px; }
-.btn--quiet:hover { color: var(--violet); }
+.btn--quiet:hover { color: var(--gov); }
 
 .btn--block { width: 100%; }
 
@@ -213,62 +190,6 @@ input[aria-invalid='true']:focus, textarea[aria-invalid='true']:focus { box-shad
   animation: spin .7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* ---------------------------------------------------------------- ballot menu */
-.ballot {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-.ballot__caption {
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--line);
-  background: var(--ink);
-  color: #fff;
-  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
-  flex-wrap: wrap;
-}
-.ballot__caption h2 { font-size: 15px; font-weight: 500; color: #fff; }
-.ballot__caption span { font-size: 12.5px; color: #9a93b5; }
-
-.ballot__row {
-  display: grid;
-  grid-template-columns: 58px 1fr auto;
-  align-items: center;
-  gap: 18px;
-  padding: 20px 24px 20px 0;
-  border-bottom: 1px solid var(--line-soft);
-  text-decoration: none; color: inherit;
-  background: var(--surface);
-  transition: background-color .14s;
-}
-.ballot__row:last-child { border-bottom: 0; }
-.ballot__row:hover { background: #faf9fc; }
-
-.ballot__stub {
-  align-self: stretch;
-  display: grid; place-items: center;
-  border-right: 1px dashed var(--line);
-  font-family: var(--mono); font-size: 12px; color: var(--muted);
-  padding: 0 8px;
-}
-.ballot__body h3 { font-size: 17px; margin-bottom: 3px; }
-.ballot__body p { font-size: 13.5px; color: var(--muted); max-width: 54ch; }
-
-.ballot__box {
-  width: 34px; height: 34px; flex: none;
-  border: 1.5px solid var(--line);
-  border-radius: var(--r-sm);
-  display: grid; place-items: center;
-  transition: border-color .14s, background-color .14s;
-}
-.ballot__box svg { opacity: 0; transform: scale(.6); transition: opacity .16s, transform .16s; color: #fff; }
-.ballot__row:hover .ballot__box,
-.ballot__row:focus-visible .ballot__box { border-color: var(--violet); background: var(--violet); }
-.ballot__row:hover .ballot__box svg,
-.ballot__row:focus-visible .ballot__box svg { opacity: 1; transform: scale(1); }
 
 /* ------------------------------------------------------------------- surfaces */
 .panel {
@@ -313,7 +234,7 @@ thead th button {
   border: 0; background: none; font: inherit; color: inherit; cursor: pointer;
   padding: 0; display: inline-flex; align-items: center; gap: 5px;
 }
-thead th button:hover { color: var(--violet); }
+thead th button:hover { color: var(--gov); }
 tbody td { padding: 13px 16px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
 tbody tr:last-child td { border-bottom: 0; }
 tbody tr:hover { background: #faf9fc; }
@@ -370,7 +291,7 @@ dialog::backdrop { background: rgba(20, 27, 45, .52); backdrop-filter: blur(2px)
   padding: 12px 14px; border-radius: var(--r-md);
   font-size: 13.5px; border: 1px solid transparent;
 }
-.notice--info { background: var(--violet-soft); border-color: #dfd2f0; color: var(--violet-deep); }
+.notice--info { background: var(--gov-soft); border-color: #dfd2f0; color: var(--gov-deep); }
 .notice--good { background: var(--verify-soft); border-color: #c5e2d7; color: var(--verify); }
 .notice--bad  { background: var(--alert-soft); border-color: #f3cdca; color: var(--alert); }
 .notice--warn { background: var(--warn-soft); border-color: #f0dcb4; color: var(--warn); }
@@ -398,8 +319,8 @@ dialog::backdrop { background: rgba(20, 27, 45, .52); backdrop-filter: blur(2px)
   cursor: pointer;
   transition: border-color .14s, background-color .14s;
 }
-.dropzone:hover, .dropzone.is-over { border-color: var(--violet); background: var(--violet-soft); }
-.dropzone__icon { color: var(--violet); margin-bottom: 10px; }
+.dropzone:hover, .dropzone.is-over { border-color: var(--gov); background: var(--gov-soft); }
+.dropzone__icon { color: var(--gov); margin-bottom: 10px; }
 .dropzone strong { display: block; font-size: 14.5px; font-weight: 500; }
 .dropzone span { font-size: 12.5px; color: var(--muted); }
 
@@ -410,8 +331,8 @@ dialog::backdrop { background: rgba(20, 27, 45, .52); backdrop-filter: blur(2px)
 }
 .filelist img, .filelist .thumb {
   width: 42px; height: 42px; border-radius: var(--r-sm); object-fit: cover;
-  background: var(--violet-soft); display: grid; place-items: center;
-  font-size: 10px; font-weight: 600; color: var(--violet); font-family: var(--mono);
+  background: var(--gov-soft); display: grid; place-items: center;
+  font-size: 10px; font-weight: 600; color: var(--gov); font-family: var(--mono);
 }
 .filelist .meta { min-width: 0; }
 .filelist .meta b { display: block; font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -441,7 +362,19 @@ dialog::backdrop { background: rgba(20, 27, 45, .52); backdrop-filter: blur(2px)
 }
 
 /* ----------------------------------------------------------------- responsive */
+/* Stacked, the brand panel sits directly over the monument, and a gradient
+   raked in from the left no longer covers the text on the right. Readability
+   wins: the scrim goes vertical and the bust reads through it. */
 @media (max-width: 900px) {
+  [data-scene-name='monument'][data-scene='on'] .split__brand::after {
+    inset: -24px -12px -8px -12px;
+    background: linear-gradient(
+      180deg,
+      rgba(6, 10, 20, .93) 0%,
+      rgba(6, 10, 20, .88) 48%,
+      rgba(6, 10, 20, .72) 100%);
+  }
+
   .split { grid-template-columns: 1fr; min-height: auto; }
   .split__brand { padding: 32px 24px 44px; }
   .split__lead h1 { font-size: 28px; }
@@ -453,11 +386,7 @@ dialog::backdrop { background: rgba(20, 27, 45, .52); backdrop-filter: blur(2px)
 
 @media (max-width: 620px) {
   .shell { padding: 26px 16px 64px; }
-  .topbar__inner { padding: 12px 16px; gap: 12px; }
-  .topbar__user span { display: none; }
   .row2 { grid-template-columns: 1fr; }
-  .ballot__row { grid-template-columns: 42px 1fr auto; gap: 12px; padding: 16px 16px 16px 0; }
-  .ballot__body h3 { font-size: 15.5px; }
   .creds div { grid-template-columns: 1fr; gap: 2px; }
   .dialog__foot .btn { flex: 1; }
 }
@@ -526,7 +455,7 @@ dialog::backdrop { background: rgba(20, 27, 45, .52); backdrop-filter: blur(2px)
 .facecheck[data-state="loading"] .facecheck__dot,
 .facecheck[data-state="camera"] .facecheck__dot { background: var(--muted); }
 .facecheck[data-state="ready"] .facecheck__dot,
-.facecheck[data-state="searching"] .facecheck__dot { background: var(--violet); }
+.facecheck[data-state="searching"] .facecheck__dot { background: var(--gov); }
 .facecheck[data-state="holding"] .facecheck__dot { background: #b8860b; }
 .facecheck[data-state="reading"] .facecheck__dot,
 .facecheck[data-state="matched"] .facecheck__dot { background: var(--verify); }
@@ -540,251 +469,602 @@ dialog::backdrop { background: rgba(20, 27, 45, .52); backdrop-filter: blur(2px)
 .facecheck__hint { font-size: 12.5px; color: var(--muted); }
 
 /* Enrolment page: the photographs staged before they are sent. */
-.enrol__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 12px;
-}
-
-.enrol__card {
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  overflow: hidden;
-  background: var(--surface);
-}
-
-.enrol__card img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--paper); }
-
-.enrol__card figcaption {
-  padding: 7px 9px;
-  font-size: 11.5px;
-  line-height: 1.35;
-  border-top: 1px solid var(--line-soft);
-}
-
-.enrol__card--ok figcaption { color: var(--verify); }
-.enrol__card--bad figcaption { color: var(--alert); }
-
 @media (max-width: 560px) {
   .facecheck__reticle { inset: 10% 18%; }
 }
 
 /* ============================================================================
-   Forest backdrop
-   A WebGL canvas sits behind everything. The panels above it become frosted
-   glass so text keeps its contrast against moving trees -- readability wins
-   over atmosphere every time, because people have to fill these forms in.
-   Everything here is scoped to [data-forest="on"], so a browser without
-   WebGL, or a voter who switched it off, gets the flat design untouched.
+   Official chrome
+   Borrowed, deliberately, from the conventions public services have settled
+   on: a banner that states what the site is before anything else, a solid
+   masthead with a seal, breadcrumbs, service cards that say who each service
+   is for, and a footer that repeats the whole thing for anyone who scrolled
+   past it.
    ========================================================================== */
 
-#forest {
+/* -------------------------------------------------------- official banner */
+.govbar {
+  background: #eceef1;
+  border-bottom: 1px solid #dcdfe4;
+  font-size: 12.5px;
+  color: #3d4757;
+}
+.govbar__wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+
+.govbar__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  cursor: pointer;
+  list-style: none;
+}
+.govbar__bar::-webkit-details-marker { display: none; }
+
+/* The flag, three bars high, as the banner's mark. */
+.govbar__tri {
+  flex: none;
+  width: 19px;
+  height: 13px;
+  border-radius: 1.5px;
+  background: linear-gradient(
+    to bottom,
+    var(--saffron) 0 33.33%,
+    #fff 33.33% 66.66%,
+    var(--green) 66.66% 100%);
+  box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .28);
+}
+.govbar__text { min-width: 0; }
+.govbar__cue {
+  margin-left: auto;
+  color: var(--gov);
+  text-decoration: underline;
+  white-space: nowrap;
+}
+.govbar__wrap[open] .govbar__cue::after { content: ' \25B4'; text-decoration: none; }
+.govbar__wrap:not([open]) .govbar__cue::after { content: ' \25BE'; text-decoration: none; }
+
+.govbar__panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  padding: 4px 0 18px;
+  max-width: 900px;
+}
+.govbar__panel b { display: block; font-size: 13px; margin-bottom: 3px; color: var(--ink); }
+.govbar__panel p { line-height: 1.5; }
+
+/* ------------------------------------------------------------------- seal */
+.seal { display: flex; align-items: center; gap: 11px; text-decoration: none; color: inherit; }
+.seal__emblem {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--chakra);
+  background: #fff;
+  box-shadow: 0 0 0 1.5px currentColor inset, 0 1px 3px rgba(10, 20, 40, .22);
+}
+.seal__text b {
+  display: block;
+  font-family: var(--serif);
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  line-height: 1.2;
+}
+.seal__text span {
+  display: block;
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.seal--light .seal__text b { color: #fff; }
+.seal--light .seal__text span { color: #b9c8de; }
+
+/* --------------------------------------------------------------- masthead */
+.masthead {
+  background: var(--navy);
+  color: #fff;
+  border-bottom: 3px solid var(--saffron);
+}
+.masthead__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  flex-wrap: wrap;
+}
+.masthead .seal__text b { color: #fff; }
+.masthead .seal__text span { color: #a9bcd6; }
+
+.masthead__nav {
+  display: flex;
+  gap: 22px;
+  margin-left: auto;
+  font-size: 13.5px;
+  flex-wrap: wrap;
+}
+.masthead__nav a {
+  color: #dbe5f1;
+  text-decoration: none;
+  padding: 6px 0;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+.masthead__nav a:hover { color: #fff; border-bottom-color: rgba(255, 255, 255, .45); }
+.masthead__nav a[aria-current='page'] { color: #fff; font-weight: 500; border-bottom-color: var(--saffron); }
+
+.masthead__session { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+.masthead__who { display: flex; flex-direction: column; line-height: 1.25; text-align: right; }
+.masthead__who span { color: #a9bcd6; font-size: 11px; }
+.masthead__who strong { color: #fff; font-weight: 600; }
+.masthead .btn--quiet { color: #dbe5f1; border: 1px solid rgba(255, 255, 255, .38); padding: 7px 12px; }
+.masthead .btn--quiet:hover { color: var(--navy); background: #fff; border-color: #fff; }
+
+/* ------------------------------------------------------------- breadcrumb */
+.breadcrumb { margin-bottom: 20px; font-size: 13px; }
+.breadcrumb ol { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.breadcrumb li { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+.breadcrumb li + li::before { content: '\203A'; color: #9aa3b0; }
+.breadcrumb a { color: var(--gov); text-decoration: underline; text-underline-offset: 2px; }
+.breadcrumb [aria-current='page'] { color: var(--ink); font-weight: 500; }
+
+/* ------------------------------------------------- right-to-vote headline */
+.hero { padding: 6px 0 34px; }
+.hero__eyebrow {
+  font-size: 11.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--gov);
+  margin-bottom: 12px;
+}
+.hero__title {
+  font-family: var(--serif);
+  font-size: clamp(38px, 7vw, 76px);
+  line-height: 1.02;
+  letter-spacing: -.028em;
+  color: var(--navy-deep);
+}
+.hero__title em { font-style: normal; color: var(--saffron-ink); }
+
+/* The tricolour, as a rule under the headline. */
+.hero__rule { display: flex; width: 190px; height: 7px; margin: 20px 0 18px; border-radius: 2px; overflow: hidden; box-shadow: 0 1px 2px rgba(10,20,40,.2); }
+.hero__rule i { flex: 1; }
+.hero__rule i:nth-child(1) { background: var(--saffron); }
+.hero__rule i:nth-child(2) { background: #fff; }
+.hero__rule i:nth-child(3) { background: var(--green); }
+
+.hero__lead { max-width: 56ch; font-size: 17px; color: #3b4658; }
+
+/* ----------------------------------------------------------- service grid */
+.services__head { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 2px solid var(--navy); }
+.services__head h2 { font-size: 21px; }
+.services__head p { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
+
+.services__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.svc { display: flex; }
+.svc__link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 22px 22px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition: border-color .16s, box-shadow .16s, transform .16s;
+}
+/* The accent edge is the one piece of colour that moves on hover. */
+.svc__link::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--navy);
+  transition: background-color .16s;
+}
+.svc__link:hover {
+  border-color: var(--gov);
+  box-shadow: 0 10px 28px -16px rgba(17, 46, 81, .55);
+  transform: translateY(-2px);
+}
+.svc__link:hover::before { background: var(--saffron); }
+
+.svc__top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.svc__icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--r-sm);
+  background: var(--gov-soft);
+  color: var(--gov);
+}
+.svc__num { font-family: var(--mono); font-size: 12px; color: #9aa3b0; letter-spacing: .08em; }
+
+.svc__title { font-size: 19px; margin-bottom: 7px; }
+.svc__body { font-size: 14px; color: #475263; line-height: 1.5; }
+
+.svc__meta { list-style: none; margin: 15px 0 0; padding: 0; display: grid; gap: 6px; }
+.svc__meta li {
+  position: relative;
+  padding-left: 19px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.svc__meta li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 6px;
+  width: 8px;
+  height: 4.5px;
+  border-left: 1.8px solid var(--green);
+  border-bottom: 1.8px solid var(--green);
+  transform: rotate(-45deg);
+}
+
+.svc__go {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: auto;
+  padding-top: 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gov);
+}
+.svc__go svg { transition: transform .16s; }
+.svc__link:hover .svc__go svg { transform: translateX(4px); }
+
+/* --------------------------------------------------------------- advisory */
+.advisory {
+  display: flex;
+  gap: 14px;
+  margin-top: 26px;
+  padding: 18px 20px;
+  background: var(--gov-soft);
+  border-left: 4px solid var(--gov);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+}
+.advisory__mark { flex: none; color: var(--gov); line-height: 0; margin-top: 2px; }
+.advisory b { display: block; font-size: 14px; margin-bottom: 3px; }
+.advisory p { font-size: 13.5px; color: #3b4658; max-width: 74ch; }
+
+/* ----------------------------------------------------------------- footer */
+.govfoot { margin-top: 64px; background: var(--navy-deep); color: #c6d3e4; }
+.govfoot__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 40px 24px 30px;
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) 1fr;
+  gap: 40px;
+}
+.govfoot__brand { display: flex; align-items: center; gap: 12px; }
+.govfoot__brand .seal__emblem { width: 38px; height: 38px; }
+.govfoot__brand b { display: block; font-family: var(--serif); font-size: 16px; color: #fff; }
+.govfoot__brand span { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #8ea5c4; }
+
+.govfoot__cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 28px; }
+.govfoot__cols h2 {
+  font-family: var(--sans);
+  font-size: 11.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 12px;
+}
+.govfoot__cols ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 13.5px; }
+.govfoot__cols a { color: #c6d3e4; text-decoration: none; }
+.govfoot__cols a:hover { color: #fff; text-decoration: underline; }
+
+.govfoot__legal {
+  border-top: 1px solid rgba(255, 255, 255, .14);
+  padding: 18px 24px 26px;
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: #9db1cc;
+}
+.govfoot__legal b { color: #fff; font-weight: 600; }
+
+/* ============================================================================
+   Sign-in page
+   Two columns over the monument hall: the left one is a caption for what is
+   standing behind it, the right one is the only solid surface on the screen.
+   ========================================================================== */
+
+.split { min-height: calc(100vh - 30px); display: grid; grid-template-columns: 1.1fr 1fr; }
+
+.split__brand {
+  position: relative;
+  padding: 46px 52px 46px 6vw;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  background: var(--navy-deep);
+  color: #fff;
+  overflow: hidden;
+}
+.split__lead { position: relative; z-index: 2; margin-top: auto; }
+.split__lead h1 {
+  font-size: clamp(30px, 3.9vw, 50px);
+  line-height: 1.1;
+  letter-spacing: -.026em;
+}
+.split__lead p { margin-top: 16px; color: #c3d1e4; font-size: 15.5px; max-width: 40ch; }
+
+/* Attribution for the relief in the scene. It is a real person and a real
+   clause of the Constitution, so the page says whose likeness it is rather
+   than leaving a bust as wallpaper. */
+.tribute { position: relative; z-index: 2; margin: 0; max-width: 46ch; }
+.tribute figcaption {
+  border-left: 3px solid var(--saffron);
+  padding: 2px 0 2px 14px;
+}
+.tribute b { display: block; font-family: var(--serif); font-size: 15px; color: #fff; margin-bottom: 4px; }
+.tribute span { display: block; font-size: 12.5px; line-height: 1.55; color: #b6c6dc; }
+
+.split__facts {
+  position: relative;
+  z-index: 2;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  font-size: 13px;
+  color: #b6c6dc;
+}
+.split__facts li { display: flex; gap: 10px; align-items: baseline; }
+.split__facts b { flex: none; min-width: 104px; color: #fff; font-weight: 500; }
+
+.split__form {
+  display: grid;
+  place-items: center;
+  padding: 46px 6vw;
+  background: var(--paper);
+}
+
+.authcard {
+  width: 100%;
+  max-width: 404px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--navy);
+  border-radius: var(--r-md);
+  padding: 28px 30px 24px;
+  box-shadow: var(--shadow);
+}
+.authcard__head { margin-bottom: 20px; }
+.authcard__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--verify);
+}
+.authcard__badge::before {
+  content: '';
+  width: 13px; height: 13px;
+  border-radius: 3px 3px 5px 5px;
+  border: 1.8px solid currentColor;
+  border-top-width: 5px;
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+}
+.authcard__head p { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+.authcard__title { font-size: 22px; margin-bottom: 5px; }
+.authcard__sub { color: var(--muted); font-size: 13.5px; margin-bottom: 22px; }
+.authcard .btn--block { margin-top: 6px; }
+.authcard__foot {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* ============================================================================
+   3D backdrop
+   A WebGL canvas sits behind everything: the monument hall on the sign-in
+   page, the tricolour on every screen behind the session. Both themes are
+   scoped to [data-scene], so a browser without WebGL -- or a voter who turned
+   it off -- gets the flat design untouched and fully usable.
+   ========================================================================== */
+
+#backdrop {
   position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
   display: block;
   z-index: -2;
-  background: #6f7d84;
+  background: var(--navy-deep);
+  opacity: 0;
+  transition: opacity .8s ease;
 }
+[data-scene='on'] #backdrop { opacity: 1; }
+[data-scene='on'] body { background: transparent; }
 
-/* Depth haze: darker at the edges, so the centre of the frame holds the eye
-   and the corners recede. */
-[data-forest="on"] body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(130% 95% at 50% 40%, rgba(18, 24, 22, 0) 45%, rgba(14, 19, 18, .30) 100%),
-    linear-gradient(to bottom, rgba(12, 17, 16, .14), rgba(12, 17, 16, 0) 40%, rgba(10, 14, 13, .22));
-}
+/* --------------------------------------------- monument hall (sign-in) */
+[data-scene-name='monument'][data-scene='on'] #backdrop { background: #080d18; }
 
-[data-forest="on"] body { background: transparent; }
+/* Both halves go transparent so the hall is one continuous room. */
+[data-scene-name='monument'][data-scene='on'] .split__brand { background: none; }
+[data-scene-name='monument'][data-scene='on'] .split__form { background: none; }
 
-/* --------------------------------------------------------- frosted surfaces */
-
-[data-forest="on"] .panel,
-[data-forest="on"] .card,
-[data-forest="on"] .split__form {
-  background: rgba(255, 255, 255, .90);
-  backdrop-filter: blur(14px) saturate(115%);
-  -webkit-backdrop-filter: blur(14px) saturate(115%);
-  border: 1px solid rgba(255, 255, 255, .55);
-  box-shadow: 0 2px 6px rgba(8, 12, 11, .18), 0 26px 60px -30px rgba(6, 10, 9, .75);
-}
-
-[data-forest="on"] .topbar {
-  background: rgba(19, 26, 24, .62);
-  backdrop-filter: blur(16px) saturate(120%);
-  -webkit-backdrop-filter: blur(16px) saturate(120%);
-  border-bottom: 1px solid rgba(255, 255, 255, .12);
-}
-
-[data-forest="on"] .topbar .mark__text,
-[data-forest="on"] .topbar__user { color: #eef2f0; }
-/* The signed-in name is violet by default, which disappears on dark glass. */
-[data-forest="on"] .topbar__user strong { color: #fff; }
-[data-forest="on"] .topbar .mark__text span,
-[data-forest="on"] .topbar__user span { color: #b9c6c1; }
-[data-forest="on"] .topbar .mark__glyph { border-color: #eef2f0; }
-[data-forest="on"] .btn--quiet { color: #cfd9d4; }
-[data-forest="on"] .btn--quiet:hover { color: #fff; }
-
-/* Text that sits directly on the scene rather than on a panel. Everything
-   here would otherwise be dark ink on dark trees -- the readability trap of
-   putting a photograph behind a working screen. */
-[data-forest="on"] .pagehead h1,
-[data-forest="on"] .crumb {
-  color: #f4f8f6;
-  text-shadow: 0 1px 3px rgba(8, 12, 11, .7), 0 0 26px rgba(8, 12, 11, .5);
-}
-
-[data-forest="on"] .pagehead p,
-[data-forest="on"] .shell > p,
-[data-forest="on"] .ballot__caption span {
-  color: #dde6e2;
-  text-shadow: 0 1px 3px rgba(8, 12, 11, .75);
-}
-
-/* A scrim behind the heading block, so the type never has to fight a trunk. */
-[data-forest="on"] .pagehead {
-  position: relative;
-}
-
-[data-forest="on"] .pagehead::before {
+/* Just enough gradient behind the headline for white type to hold against
+   whatever is lit behind it. */
+[data-scene-name='monument'][data-scene='on'] .split__brand::after {
   content: '';
   position: absolute;
-  inset: -18px -26px -12px -26px;
+  inset: -40px -10px -40px -50vw;
   z-index: -1;
-  border-radius: var(--r-lg);
-  background: radial-gradient(90% 120% at 0% 40%, rgba(10, 15, 14, .62), rgba(10, 15, 14, 0) 78%);
   pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    rgba(6, 10, 20, .88) 0%,
+    rgba(6, 10, 20, .74) 38%,
+    rgba(6, 10, 20, .34) 64%,
+    rgba(6, 10, 20, 0) 86%);
 }
 
-[data-forest="on"] .crumb:hover { color: #fff; }
+[data-scene-name='monument'][data-scene='on'] .authcard {
+  background: rgba(255, 255, 255, .93);
+  backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, .8);
+}
 
-[data-forest="on"] .ballot__row {
-  background: rgba(255, 255, 255, .92);
+[data-scene-name='monument'][data-scene='on'] .govbar--dark {
+  background: rgba(8, 13, 24, .74);
+  backdrop-filter: blur(10px);
+  border-bottom-color: rgba(255, 255, 255, .14);
+  color: #c6d3e4;
+}
+[data-scene-name='monument'][data-scene='on'] .govbar--dark .govbar__cue { color: #ffc27a; }
+[data-scene-name='monument'][data-scene='on'] .govbar--dark .govbar__panel b { color: #fff; }
+
+/* ------------------------------------------ tricolour sky (after sign-in) */
+[data-scene-name='tricolour'][data-scene='on'] #backdrop { background: #eef2f7; }
+
+/* The sky is pale on purpose, so ordinary dark text needs no help. Panels get
+   only a light frosting, enough to separate a form from a moving flag. */
+[data-scene-name='tricolour'][data-scene='on'] .govbar {
+  background: rgba(244, 246, 249, .84);
+  backdrop-filter: blur(10px);
+}
+[data-scene-name='tricolour'][data-scene='on'] .masthead {
+  background: rgba(17, 46, 81, .93);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+}
+[data-scene-name='tricolour'][data-scene='on'] .panel,
+[data-scene-name='tricolour'][data-scene='on'] .svc__link,
+[data-scene-name='tricolour'][data-scene='on'] .tablewrap,
+[data-scene-name='tricolour'][data-scene='on'] .filters,
+[data-scene-name='tricolour'][data-scene='on'] dialog {
+  background: rgba(255, 255, 255, .9);
+  backdrop-filter: blur(12px) saturate(1.05);
+  box-shadow: 0 1px 2px rgba(17, 46, 81, .08), 0 16px 40px -26px rgba(17, 46, 81, .45);
+}
+[data-scene-name='tricolour'][data-scene='on'] .advisory {
+  background: rgba(233, 239, 248, .88);
+  backdrop-filter: blur(10px);
+}
+[data-scene-name='tricolour'][data-scene='on'] .govfoot {
+  background: rgba(10, 31, 60, .95);
+  backdrop-filter: blur(12px);
 }
 
-[data-forest="on"] .table-wrap,
-[data-forest="on"] dialog {
-  background: rgba(255, 255, 255, .95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+/* ------------------------------------------------- arrival and departure */
+[data-scene='on'] .shell,
+[data-scene='on'] .split { animation: scene-arrive .66s cubic-bezier(.2, .7, .2, 1) both; }
+
+@keyframes scene-arrive {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
 }
 
-/* ------------------------------------------------------ leaving the page */
-
-/* The fly-through animates the camera; this dissolves the content over it so
-   the two read as one movement into the trees. */
-[data-forest="on"][data-leaving="true"] .shell,
-[data-forest="on"][data-leaving="true"] .topbar,
-[data-forest="on"][data-leaving="true"] .split {
+/* Held while the camera move plays, so the page dissolves into the scene
+   rather than cutting to the next one. */
+[data-scene='on'][data-leaving='true'] .shell,
+[data-scene='on'][data-leaving='true'] .masthead,
+[data-scene='on'][data-leaving='true'] .govbar,
+[data-scene='on'][data-leaving='true'] .govfoot,
+[data-scene='on'][data-leaving='true'] .split {
+  transition: opacity .42s ease, transform .42s ease;
   opacity: 0;
-  transform: scale(1.04);
-  transition: opacity .5s ease, transform .6s cubic-bezier(.4, 0, .2, 1);
+  transform: translateY(-10px);
 }
 
-/* Arriving: content settles while the fog clears. */
-[data-forest="on"] .shell,
-[data-forest="on"] .split {
-  animation: forest-arrive .7s cubic-bezier(.2, .7, .2, 1) both;
-}
-
-@keyframes forest-arrive {
-  from { opacity: 0; transform: translateY(10px) scale(.995); }
-  to   { opacity: 1; transform: none; }
-}
-
-/* ------------------------------------------------------------ the off switch */
-
-.forest-toggle {
+/* ------------------------------------------------------------ the switch */
+.scene-toggle {
   position: fixed;
   right: 14px;
   bottom: 14px;
-  z-index: 40;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: #e7edea;
-  background: rgba(19, 26, 24, .66);
-  border: 1px solid rgba(255, 255, 255, .22);
+  z-index: 55;
+  font: inherit;
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  padding: 7px 12px;
   border-radius: 999px;
-  padding: 7px 13px;
   cursor: pointer;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  color: #e7eef7;
+  background: rgba(10, 22, 42, .72);
+  border: 1px solid rgba(255, 255, 255, .22);
+  backdrop-filter: blur(8px);
 }
-
-.forest-toggle:hover { background: rgba(19, 26, 24, .82); }
-.forest-toggle:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-
-[data-forest="off"] .forest-toggle {
+.scene-toggle:hover { background: rgba(10, 22, 42, .88); }
+.scene-toggle:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+[data-scene='off'] .scene-toggle {
   color: var(--muted);
   background: var(--surface);
   border-color: var(--line);
 }
 
-/* Nothing moves, and nothing dissolves, for anyone who asked for that. */
+/* Nothing arrives, and nothing dissolves, for anyone who asked for that. */
 @media (prefers-reduced-motion: reduce) {
-  [data-forest="on"] .shell,
-  [data-forest="on"] .split { animation: none; }
-  [data-forest="on"][data-leaving="true"] .shell,
-  [data-forest="on"][data-leaving="true"] .topbar,
-  [data-forest="on"][data-leaving="true"] .split { transition: none; opacity: 1; transform: none; }
+  [data-scene='on'] .shell,
+  [data-scene='on'] .split { animation: none; }
+  [data-scene='on'][data-leaving='true'] .shell,
+  [data-scene='on'][data-leaving='true'] .masthead,
+  [data-scene='on'][data-leaving='true'] .govbar,
+  [data-scene='on'][data-leaving='true'] .govfoot,
+  [data-scene='on'][data-leaving='true'] .split { transition: none; opacity: 1; transform: none; }
 }
 
-/* The sign-in page is two opaque half-screen panels by default, which would
-   cover the scene completely. Over the forest both columns go transparent and
-   the form becomes a card floating in the mist. */
-[data-forest="on"] .split__brand {
-  background: none;
+/* --------------------------------------------------------------- narrow */
+@media (max-width: 980px) {
+  .masthead__inner { gap: 16px; }
+  .masthead__nav { order: 3; width: 100%; margin-left: 0; gap: 18px; }
+  .masthead__session { margin-left: auto; }
 }
 
-/* Just enough gradient behind the headline for the white type to hold. */
-[data-forest="on"] .split__brand::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(100deg, rgba(11, 16, 15, .70) 0%, rgba(11, 16, 15, .30) 45%, rgba(11, 16, 15, .06) 72%, rgba(11, 16, 15, 0) 88%);
-  pointer-events: none;
+@media (max-width: 900px) {
+  .split { grid-template-columns: 1fr; min-height: auto; }
+  .split__brand { padding: 34px 24px 40px; gap: 22px; }
+  .split__lead { margin-top: 0; }
+  .split__form { padding: 34px 24px 60px; }
+  .govbar__panel { grid-template-columns: 1fr; gap: 14px; }
+  .govfoot__inner { grid-template-columns: 1fr; gap: 28px; }
 }
 
-[data-forest="on"] .split__form {
-  background: none;
-  padding: 44px 40px;
+@media (max-width: 620px) {
+  .govbar__text { display: none; }
+  .govbar__cue { margin-left: 0; }
+  .masthead__inner { padding: 12px 16px; }
+  .masthead__who span { display: none; }
+  .masthead__nav { font-size: 13px; gap: 14px; }
+  .seal__emblem { width: 36px; height: 36px; }
+  .services__grid { grid-template-columns: 1fr; }
+  .hero__lead { font-size: 15.5px; }
+  .authcard { padding: 24px 20px 20px; }
+  .govfoot__legal { padding-left: 16px; padding-right: 16px; }
 }
-
-/* The bare wrapper inside .split__form is the card. */
-[data-forest="on"] .split__form > div {
-  width: 100%;
-  max-width: 420px;
-  padding: 30px 30px 34px;
-  border-radius: var(--r-lg);
-  background: rgba(255, 255, 255, .93);
-  backdrop-filter: blur(18px) saturate(115%);
-  -webkit-backdrop-filter: blur(18px) saturate(115%);
-  border: 1px solid rgba(255, 255, 255, .6);
-  box-shadow: 0 2px 8px rgba(8, 12, 11, .22), 0 34px 70px -32px rgba(6, 10, 9, .8);
-}
-
-[data-forest="on"] .split__brand h1 {
-  text-shadow: 0 2px 18px rgba(6, 10, 9, .8), 0 1px 3px rgba(6, 10, 9, .9);
-}
-
-[data-forest="on"] .split__lead,
-[data-forest="on"] .split__facts { text-shadow: 0 1px 3px rgba(6, 10, 9, .85); }
-
-/* The fingerprint line-art belonged to the flat navy panel; over trees it just
-   reads as stray geometry. */
-[data-forest="on"] .thumbmark { display: none; }

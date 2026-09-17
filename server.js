@@ -109,7 +109,6 @@ const protectedPages = {
   '/voter-card': 'voter-card.html',
   '/e-vote': 'e-vote.html',
   '/raise-ticket': 'raise-ticket.html',
-  '/enrol-face': 'enrol-face.html',
 };
 
 Object.entries(protectedPages).forEach(([route, file]) => {

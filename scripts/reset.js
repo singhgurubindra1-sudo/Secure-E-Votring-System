@@ -89,7 +89,7 @@ if (want.users) {
   console.log('\n  Accounts were cleared, so create a new one on the sign-in page.');
 }
 if (want.faces) {
-  console.log('  Faces were cleared, so enrol again at /enrol-face.');
+  console.log('  Faces were cleared. Re-enrol through POST /api/face/enrol; until then no camera check runs.');
 }
 if (want.roll) {
   console.log('  Roll was cleared: npm run import-voters -- data/voters.sample.json');

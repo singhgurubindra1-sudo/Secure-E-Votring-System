@@ -8,29 +8,65 @@
 <link rel="icon" href="data:,">
 </head>
 <body>
-<canvas id="forest" aria-hidden="true"></canvas>
+<canvas id="backdrop" aria-hidden="true"></canvas>
 <a class="skip" href="#main">Skip to content</a>
 
-<header class="topbar">
-  <div class="topbar__inner">
-    <a class="mark" href="/dashboard">
-      <span class="mark__glyph" aria-hidden="true"></span>
-      <span class="mark__text">Secure E-Voting<span>Electoral services portal</span></span>
+<div class="govbar">
+  <details class="govbar__wrap">
+    <summary class="govbar__bar">
+      <span class="govbar__tri" aria-hidden="true"></span>
+      <span class="govbar__text">A demonstration electoral services portal, built for academic review</span>
+      <span class="govbar__cue">Here&rsquo;s how you can tell</span>
+    </summary>
+    <div class="govbar__panel">
+      <div>
+        <b>This is not a live election service</b>
+        <p>The electoral roll, the candidates and the ballots are sample data held on this
+        server. No ballot cast here is reported to any election authority.</p>
+      </div>
+      <div>
+        <b>A secure session, even so</b>
+        <p>Sign-in is signed and time-limited, the session cookie is HTTP-only and
+        same-site, and a sealed ballot is stored with no link back to the voter who cast it.</p>
+      </div>
+    </div>
+  </details>
+</div>
+
+<header class="masthead">
+  <div class="masthead__inner">
+    <a class="seal" href="/dashboard">
+      <span class="seal__emblem" aria-hidden="true"><svg class="chakra " width="30" height="30" viewBox="0 0 48 48" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="24" cy="24" r="20" stroke-width="2.4"/><g stroke-width="1.15"><line x1="24" y1="4" x2="24" y2="44" transform="rotate(0 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(15 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(30 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(45 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(60 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(75 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(90 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(105 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(120 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(135 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(150 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(165 24 24)"/></g><circle cx="24" cy="24" r="3.1" fill="currentColor" stroke="none"/></svg></span>
+      <span class="seal__text">
+        <b>Secure E-Voting</b>
+        <span>Office of Electoral Services</span>
+      </span>
     </a>
-    <div class="topbar__spacer"></div>
-    <div class="topbar__user">
-      <span>Signed in as</span>
-      <strong data-session-name>&nbsp;</strong>
+
+    <nav class="masthead__nav" data-nav aria-label="Electoral services">
+      <a href="/voter-list">Electoral roll</a>
+      <a href="/voter-card">Voter card</a>
+      <a href="/e-vote">Cast a ballot</a>
+      <a href="/raise-ticket">Help &amp; complaints</a>
+    </nav>
+
+    <div class="masthead__session">
+      <span class="masthead__who">
+        <span>Signed in as</span>
+        <strong data-session-name>&nbsp;</strong>
+      </span>
       <button class="btn btn--quiet" type="button" data-signout>Sign out</button>
     </div>
   </div>
 </header>
 
 <main class="shell shell--narrow" id="main">
-  <a class="crumb" href="/dashboard">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-    Back to dashboard
-  </a>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <ol>
+      <li><a href="/dashboard">Electoral services</a></li>
+      <li aria-current="page">Voter card</li>
+    </ol>
+  </nav>
 
   <div class="pagehead">
     <h1>Voter card download</h1>
@@ -87,6 +123,53 @@
   </div>
 </main>
 
+<footer class="govfoot">
+  <div class="govfoot__inner">
+    <div class="govfoot__brand">
+      <span class="seal__emblem" aria-hidden="true"><svg class="chakra " width="26" height="26" viewBox="0 0 48 48" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="24" cy="24" r="20" stroke-width="2.4"/><g stroke-width="1.15"><line x1="24" y1="4" x2="24" y2="44" transform="rotate(0 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(15 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(30 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(45 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(60 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(75 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(90 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(105 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(120 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(135 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(150 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(165 24 24)"/></g><circle cx="24" cy="24" r="3.1" fill="currentColor" stroke="none"/></svg></span>
+      <div>
+        <b>Secure E-Voting</b>
+        <span>Office of Electoral Services</span>
+      </div>
+    </div>
+
+    <div class="govfoot__cols">
+      <div>
+        <h2>Electoral services</h2>
+        <ul>
+          <li><a href="/voter-list">Check the electoral roll</a></li>
+          <li><a href="/voter-card">Download your voter card</a></li>
+          <li><a href="/e-vote">Cast your ballot</a></li>
+          <li><a href="/raise-ticket">Report a problem</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Your rights</h2>
+        <ul>
+          <li>One vote of equal value</li>
+          <li>A secret ballot</li>
+          <li>A correction to a wrong entry</li>
+          <li>An answer to every complaint</li>
+        </ul>
+      </div>
+      <div>
+        <h2>About this portal</h2>
+        <ul>
+          <li>Sample roll and candidates</li>
+          <li>Face verification where a photograph is on file</li>
+          <li>Ballots stored without voter identity</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="govfoot__legal">
+    <p><b>Demonstration service.</b> Sample data only. No ballot cast here is reported to
+    any election authority.</p>
+    <p>Universal adult suffrage &middot; Constitution of India, Article 326</p>
+  </div>
+</footer>
+
 <dialog class="dialog" id="faceDialog" aria-labelledby="faceTitle">
   <div class="dialog__head">
     <h2 id="faceTitle">Face verification</h2>
@@ -114,6 +197,6 @@
 
 <script src="/vendor/face-api/face-api.js"></script>
 <script type="module" src="/js/voter-card.js"></script>
-<script type="module" src="/js/forest-mount.js"></script>
+<script type="module" src="/js/scene-mount.js"></script>
 </body>
 </html>

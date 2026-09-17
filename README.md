@@ -99,23 +99,31 @@ or, when it is not installed:
   Run "npm install" in the project folder, then restart the server.
 ```
 
-`GET /api/face/assets` reports the same thing, and the enrolment page shows it
-in place of a vague "reload the page".
+`GET /api/face/assets` reports the same thing over HTTP.
 
 ### Enrolling a face
 
-**No face is enrolled until you do this, and until then no camera check runs.**
-`data/face-templates.json` is not in the repository, so a fresh clone has no
-faces on file. Both guarded pages say so plainly when the voter has none —
-look for the amber "no camera check will run" notice.
+**No face is enrolled until an administrator does it, and until then no camera
+check runs.** `data/face-templates.json` is not in the repository, so a fresh
+clone has no faces on file. Both guarded pages say so plainly when the voter
+has none — look for the amber "no camera check will run" notice.
 
-Sign in and open **Enrol a face** from the dashboard, or go to `/enrol-face`.
-Pick the voter ID and two or three clear, front-facing photographs with only
-that person in frame. The pictures are read in the browser; only the resulting
-measurements and one cropped portrait reach the server.
+Enrolment is an administrative action, not a voter-facing one: there is no
+enrolment page in the portal. A signed-in session posts to
+`POST /api/face/enrol` with the voter ID, one or more 128-value face
+descriptors and an optional cropped portrait:
 
-The portrait is printed in the photograph panel on the card. Voters with no
-photograph on file keep the placeholder.
+```json
+{ "voterId": "PNB4521907", "descriptors": [[0.12, -0.04, ...]], "photo": "data:image/jpeg;base64,..." }
+```
+
+Descriptors are computed from photographs by the same face-api model the live
+check uses, so the raw pictures never have to leave the machine that holds
+them. The portrait is printed in the photograph panel on the card; voters with
+no photograph on file keep the placeholder.
+
+`npm run reset` keeps enrolled faces on purpose. Only `--faces` or `--all`
+clears them, and that cannot be undone without enrolling again.
 
 ### Where the biometric data lives
 
@@ -213,31 +221,64 @@ challenged — switch to `all` once everyone on the roll has a face on file.
   enrol or delete any voter's face, because the portal has no admin role yet.
   That is the most important gap to close before this is used for anything real.
 
-## Forest backdrop
+## Look and feel
 
-Every page renders a foggy conifer forest behind it in WebGL, and leaving a
-page pushes the camera forward through the trees before the next one loads.
+The portal is dressed as a public service rather than a product, in the idiom
+that government sites have converged on: a banner that says what the site is
+before anything else, a solid masthead with a seal, breadcrumbs, service cards
+that state who each service is for and what it needs, and a footer that repeats
+all of it. The palette is an official navy, with the flag's saffron and green
+kept for the tricolour rule and the emblem and used nowhere else.
 
-It is **procedural** — there are no model or texture files. The trees are
-tapered cylinders with stacked cones, the mist is canvas-drawn radial
-gradients on drifting planes, and the depth comes from exponential fog. The
-whole illusion rests on one relationship: the air is much lighter than the
-trees, so every trunk reads as a silhouette and the fog alone separates the
-near ranks from the far ones. That is atmospheric rather than photorealistic,
-and it costs no downloaded assets beyond three.js itself.
+### Two 3D backdrops
 
-Three things matter as much as how it looks:
+Both are drawn in WebGL, and both are **procedural** — there are no model or
+texture files anywhere in the repository. Everything is geometry plus
+canvas-drawn textures, so the only downloaded asset is three.js itself.
 
-- **It stops while the face check runs.** TensorFlow.js wants the same GPU,
-  and the camera check is the part that has to stay quick.
-- **It respects `prefers-reduced-motion`** — one still frame, no animation.
+**Sign-in: the monument hall.** A bronze memorial bust of Dr B. R. Ambedkar
+stands on an inscribed marble plinth in a colonnade, with a ballot box beside
+it and ballot papers turning slowly through the light. The page names the
+figure and the clause beside it, because it is a real person and a real part
+of the Constitution rather than decoration.
+
+The bust is a **deliberate stylisation, not a portrait likeness.** It is built
+the way a memorial reads at a distance — the swept-back hair over a high
+forehead, the round spectacles, the suit and tie, the volume of the
+Constitution at the plinth, the name cut into the stone. Two things were
+learnt building it:
+
+- A flat extruded silhouette cannot look sculpted. Its front face has one
+  normal across the whole surface, so it shades evenly however it is lit and
+  reads as a cut-out. The head is therefore real volume — cranium over jaw,
+  brow ridge, nose — and it is that curvature which makes it look cast.
+- A metal with no `scene.environment` is nearly black. `metalness` means
+  "show me what is around you", and direct lights alone leave nothing to
+  show. A painted equirectangular sketch of the room is what turns the
+  material from plastic into bronze.
+
+**After sign-in: the tricolour.** The national flag, at 3:2 with a 24-spoke
+Ashoka Chakra, flying in bright open air, the cloth moved by two crossing
+waves damped to nothing at the hoist. This one is pale on purpose: the working
+screens carry forms, tables and a ballot, so the backdrop is light enough that
+ordinary dark text sits on it unaided.
+
+### Three things that matter as much as how it looks
+
+- **The scene stops while the face check runs.** TensorFlow.js wants the same
+  GPU, and the camera check is the part that has to stay quick. Measured: with
+  the backdrop on, the page's own animation frames during a check drop from
+  317 to 84, and the check itself is no slower.
+- **It respects `prefers-reduced-motion`** — one still frame, no animation,
+  no page transition.
 - **It can be switched off**, from the button in the bottom corner, and the
-  choice is remembered per browser. Everything forest-related is scoped to
-  `[data-forest="on"]`, so switching off — or a browser without WebGL — gets
-  the flat design untouched.
+  choice is remembered per browser. Every scene rule is scoped to
+  `[data-scene="on"]`, so switching off — or a browser without WebGL — gets
+  the flat design untouched and fully usable.
 
-Panels over the scene become frosted glass and headings get a scrim, because
-readability wins over atmosphere on a screen somebody has to fill in.
+Panels over the sign-in hall become frosted glass and the headline gets a
+scrim, because readability wins over atmosphere on a screen somebody has to
+fill in.
 
 ## Layout
 
@@ -262,9 +303,13 @@ middleware/auth.js     JWT cookie sessions and route guards
 public/                pages, stylesheet, page scripts
   js/face-verify.js    camera, single-face rule, descriptor capture
   js/face-gate.js      the dialog both guarded actions share
+  js/scene-core.js     renderer, render loop, opt-out, page transition
+  js/scene-monument.js the Ambedkar monument hall behind sign-in
+  js/scene-tricolour.js the flag flying behind every page after it
+  js/scene-mount.js    picks the scene for the page and offers the switch
 data/                  JSON data files (biometric files are gitignored)
 tests/                 node:test suites and image fixtures
-scripts/               import-voters.js
+scripts/               import-voters.js, reset.js
 ```
 
 ## Resetting between tests

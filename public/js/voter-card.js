@@ -15,8 +15,8 @@ const errorBox = form.querySelector('[data-form-error]');
 const okBox = form.querySelector('[data-form-ok]');
 
 /**
- * Spells out the face-check state. Without this an unenrolled voter just gets a
- * card with no camera step and no idea why.
+ * Spells out the face-check state. Without this a voter with no reference
+ * photograph on file just gets a card with no camera step and no idea why.
  */
 function showFaceState(data) {
   if (data === null) {
@@ -30,8 +30,8 @@ function showFaceState(data) {
   } else {
     faceState.className = 'notice notice--warn';
     faceState.innerHTML =
-      '<span>No face is on file for this voter ID, so <strong>no camera check will run</strong>. ' +
-      '<a href="/enrol-face">Enrol a face</a> to require one.</span>';
+      '<span>No reference photograph is on file for this voter ID, so ' +
+      '<strong>no camera check will run</strong>. Raise a ticket if you expected one.</span>';
   }
   faceState.hidden = false;
 }

@@ -8,98 +8,218 @@
 <link rel="icon" href="data:,">
 </head>
 <body>
-<canvas id="forest" aria-hidden="true"></canvas>
+<canvas id="backdrop" aria-hidden="true"></canvas>
 <a class="skip" href="#main">Skip to content</a>
 
-<header class="topbar">
-  <div class="topbar__inner">
-    <a class="mark" href="/dashboard">
-      <span class="mark__glyph" aria-hidden="true"></span>
-      <span class="mark__text">Secure E-Voting<span>Electoral services portal</span></span>
+<div class="govbar">
+  <details class="govbar__wrap">
+    <summary class="govbar__bar">
+      <span class="govbar__tri" aria-hidden="true"></span>
+      <span class="govbar__text">A demonstration electoral services portal, built for academic review</span>
+      <span class="govbar__cue">Here&rsquo;s how you can tell</span>
+    </summary>
+    <div class="govbar__panel">
+      <div>
+        <b>This is not a live election service</b>
+        <p>The electoral roll, the candidates and the ballots are sample data held on this
+        server. No ballot cast here is reported to any election authority.</p>
+      </div>
+      <div>
+        <b>A secure session, even so</b>
+        <p>Sign-in is signed and time-limited, the session cookie is HTTP-only and
+        same-site, and a sealed ballot is stored with no link back to the voter who cast it.</p>
+      </div>
+    </div>
+  </details>
+</div>
+
+<header class="masthead">
+  <div class="masthead__inner">
+    <a class="seal" href="/dashboard">
+      <span class="seal__emblem" aria-hidden="true"><svg class="chakra " width="30" height="30" viewBox="0 0 48 48" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="24" cy="24" r="20" stroke-width="2.4"/><g stroke-width="1.15"><line x1="24" y1="4" x2="24" y2="44" transform="rotate(0 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(15 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(30 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(45 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(60 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(75 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(90 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(105 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(120 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(135 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(150 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(165 24 24)"/></g><circle cx="24" cy="24" r="3.1" fill="currentColor" stroke="none"/></svg></span>
+      <span class="seal__text">
+        <b>Secure E-Voting</b>
+        <span>Office of Electoral Services</span>
+      </span>
     </a>
-    <div class="topbar__spacer"></div>
-    <div class="topbar__user">
-      <span>Signed in as</span>
-      <strong data-session-name>&nbsp;</strong>
+
+    <nav class="masthead__nav" data-nav aria-label="Electoral services">
+      <a href="/voter-list">Electoral roll</a>
+      <a href="/voter-card">Voter card</a>
+      <a href="/e-vote">Cast a ballot</a>
+      <a href="/raise-ticket">Help &amp; complaints</a>
+    </nav>
+
+    <div class="masthead__session">
+      <span class="masthead__who">
+        <span>Signed in as</span>
+        <strong data-session-name>&nbsp;</strong>
+      </span>
       <button class="btn btn--quiet" type="button" data-signout>Sign out</button>
     </div>
   </div>
 </header>
 
 <main class="shell" id="main">
-  <div class="pagehead">
-    <h1>What would you like to do?</h1>
-    <p>Everything below works from your voter ID number. Pick a service to begin.</p>
-  </div>
 
-  <div class="ballot">
-    <div class="ballot__caption">
-      <h2>Electoral services</h2>
-      <span>Four services available</span>
+  <section class="hero">
+    <p class="hero__eyebrow">Constitution of India &middot; Article 326</p>
+    <h1 class="hero__title">Right to <em>Vote</em></h1>
+    <span class="hero__rule" aria-hidden="true"><i></i><i></i><i></i></span>
+    <p class="hero__lead">
+      Every citizen of eighteen years and over has one vote, of equal weight to every
+      other vote cast. These services are how you use yours.
+    </p>
+  </section>
+
+  <section class="services" aria-labelledby="services-heading">
+    <div class="services__head">
+      <h2 id="services-heading">Electoral services</h2>
+      <p>Four services, each one working from your voter ID number.</p>
     </div>
 
-    <a class="ballot__row reveal" href="/voter-list" style="animation-delay:.02s">
-      <span class="ballot__stub" aria-hidden="true">01</span>
-      <span class="ballot__body">
-        <h3>Voter list check</h3>
-        <p>Search the full electoral roll by name or voter ID and confirm your entry.</p>
-      </span>
-      <span class="ballot__box" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      </span>
-    </a>
+    <ul class="services__grid">
+      <li class="svc reveal" style="animation-delay:.01s">
+        <a class="svc__link" href="/voter-list">
+          <span class="svc__top">
+            <span class="svc__icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h13M3 11h13M3 16h8"/><circle cx="19" cy="16.5" r="3.2"/><path d="m21.6 19 1.9 2"/></svg></span>
+            <span class="svc__num" aria-hidden="true">01</span>
+          </span>
+          <h3 class="svc__title">Check the electoral roll</h3>
+          <p class="svc__body">Search the published roll by name or voter ID and confirm your entry is correct before polling day.</p>
+          <ul class="svc__meta">
+            <li>Open to every signed-in voter</li>
+            <li>No documents needed</li>
+          </ul>
+          <span class="svc__go">
+            Start now
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </span>
+        </a>
+      </li>
 
-    <a class="ballot__row reveal" href="/voter-card" style="animation-delay:.08s">
-      <span class="ballot__stub" aria-hidden="true">02</span>
-      <span class="ballot__body">
-        <h3>Voter card download</h3>
-        <p>Enter your name, date of birth and voter ID to download a print-ready card as a PDF.</p>
-      </span>
-      <span class="ballot__box" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      </span>
-    </a>
+      <li class="svc reveal" style="animation-delay:.02s">
+        <a class="svc__link" href="/voter-card">
+          <span class="svc__top">
+            <span class="svc__icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.2"/><circle cx="8.5" cy="11" r="2.4"/><path d="M4.8 17c.7-1.9 2-2.9 3.7-2.9s3 1 3.7 2.9M15 9.5h4M15 13h4"/></svg></span>
+            <span class="svc__num" aria-hidden="true">02</span>
+          </span>
+          <h3 class="svc__title">Download your voter card</h3>
+          <p class="svc__body">Produce a print-ready PDF of your card, with your photograph where one is held on file.</p>
+          <ul class="svc__meta">
+            <li>Needs your name, date of birth and voter ID</li>
+            <li>Camera check where a photograph is on file</li>
+          </ul>
+          <span class="svc__go">
+            Start now
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </span>
+        </a>
+      </li>
 
-    <a class="ballot__row reveal" href="/e-vote" style="animation-delay:.14s">
-      <span class="ballot__stub" aria-hidden="true">03</span>
-      <span class="ballot__body">
-        <h3>E-Vote</h3>
-        <p>Confirm your details, then cast one sealed ballot. A voter ID can be used only once.</p>
-      </span>
-      <span class="ballot__box" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      </span>
-    </a>
+      <li class="svc reveal" style="animation-delay:.03s">
+        <a class="svc__link" href="/e-vote">
+          <span class="svc__top">
+            <span class="svc__icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 12 6l8 4.5-8 4.5z"/><path d="M4 14.5 12 19l8-4.5"/><path d="m9.4 10.8 2 2 3.4-3.6"/></svg></span>
+            <span class="svc__num" aria-hidden="true">03</span>
+          </span>
+          <h3 class="svc__title">Cast your ballot</h3>
+          <p class="svc__body">Confirm your details and seal a single ballot. Your choice is stored with no link back to you.</p>
+          <ul class="svc__meta">
+            <li>One ballot per voter ID, used once</li>
+            <li>Camera check where a photograph is on file</li>
+          </ul>
+          <span class="svc__go">
+            Start now
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </span>
+        </a>
+      </li>
 
-    <a class="ballot__row reveal" href="/raise-ticket" style="animation-delay:.2s">
-      <span class="ballot__stub" aria-hidden="true">04</span>
-      <span class="ballot__body">
-        <h3>Raise a ticket</h3>
-        <p>Report a wrong entry, a missing name or any other problem. Attach photos or a PDF.</p>
-      </span>
-      <span class="ballot__box" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      </span>
-    </a>
+      <li class="svc reveal" style="animation-delay:.04s">
+        <a class="svc__link" href="/raise-ticket">
+          <span class="svc__top">
+            <span class="svc__icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.4 9.3a2.7 2.7 0 0 1 5.2.9c0 1.8-2.6 2-2.6 4"/><path d="M12 17.4h.01"/></svg></span>
+            <span class="svc__num" aria-hidden="true">04</span>
+          </span>
+          <h3 class="svc__title">Report a problem</h3>
+          <p class="svc__body">Raise a wrong entry, a missing name or anything else. Attach photographs or a PDF as evidence.</p>
+          <ul class="svc__meta">
+            <li>Reply sent to your registered email</li>
+            <li>Reference number issued at once</li>
+          </ul>
+          <span class="svc__go">
+            Start now
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </span>
+        </a>
+      </li>
+    </ul>
+  </section>
 
-    <a class="ballot__row reveal" href="/enrol-face" style="animation-delay:.26s">
-      <span class="ballot__stub" aria-hidden="true">05</span>
-      <span class="ballot__body">
-        <h3>Enrol a face</h3>
-        <p>Register the reference photograph used to verify a voter before a card or a ballot is released.</p>
-      </span>
-      <span class="ballot__box" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      </span>
-    </a>
-  </div>
+  <aside class="advisory">
+    <span class="advisory__mark" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3.6 18.2A1.4 1.4 0 0 0 4.8 20.4h14.4a1.4 1.4 0 0 0 1.2-2.2z"/><path d="M12 9.2v4.4"/><path d="M12 17h.01"/></svg>
+    </span>
+    <div>
+      <b>What is published, and what is not</b>
+      <p>
+        Names on the electoral roll are published so that anyone may verify it. Your
+        ballot choice is not, and cannot be recovered from what is stored.
+      </p>
+    </div>
+  </aside>
 
-  <p style="margin-top:22px;font-size:13px;color:var(--muted);max-width:62ch">
-    Names on the roll are published for public verification. Your ballot choice is not.
-  </p>
 </main>
 
+<footer class="govfoot">
+  <div class="govfoot__inner">
+    <div class="govfoot__brand">
+      <span class="seal__emblem" aria-hidden="true"><svg class="chakra " width="26" height="26" viewBox="0 0 48 48" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="24" cy="24" r="20" stroke-width="2.4"/><g stroke-width="1.15"><line x1="24" y1="4" x2="24" y2="44" transform="rotate(0 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(15 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(30 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(45 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(60 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(75 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(90 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(105 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(120 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(135 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(150 24 24)"/><line x1="24" y1="4" x2="24" y2="44" transform="rotate(165 24 24)"/></g><circle cx="24" cy="24" r="3.1" fill="currentColor" stroke="none"/></svg></span>
+      <div>
+        <b>Secure E-Voting</b>
+        <span>Office of Electoral Services</span>
+      </div>
+    </div>
+
+    <div class="govfoot__cols">
+      <div>
+        <h2>Electoral services</h2>
+        <ul>
+          <li><a href="/voter-list">Check the electoral roll</a></li>
+          <li><a href="/voter-card">Download your voter card</a></li>
+          <li><a href="/e-vote">Cast your ballot</a></li>
+          <li><a href="/raise-ticket">Report a problem</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Your rights</h2>
+        <ul>
+          <li>One vote of equal value</li>
+          <li>A secret ballot</li>
+          <li>A correction to a wrong entry</li>
+          <li>An answer to every complaint</li>
+        </ul>
+      </div>
+      <div>
+        <h2>About this portal</h2>
+        <ul>
+          <li>Sample roll and candidates</li>
+          <li>Face verification where a photograph is on file</li>
+          <li>Ballots stored without voter identity</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="govfoot__legal">
+    <p><b>Demonstration service.</b> Sample data only. No ballot cast here is reported to
+    any election authority.</p>
+    <p>Universal adult suffrage &middot; Constitution of India, Article 326</p>
+  </div>
+</footer>
+
 <script type="module" src="/js/dashboard.js"></script>
-<script type="module" src="/js/forest-mount.js"></script>
+<script type="module" src="/js/scene-mount.js"></script>
 </body>
 </html>

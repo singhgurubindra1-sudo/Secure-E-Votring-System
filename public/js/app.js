@@ -108,10 +108,21 @@ export function formatBytes(bytes) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-/** Fill the header with the signed-in name and wire the sign-out button. */
+/**
+ * Fill the masthead with the signed-in name, mark the service the voter is
+ * currently in, and wire the sign-out button.
+ */
 export async function mountSession() {
   const slot = $('[data-session-name]');
   const signOut = $('[data-signout]');
+
+  // aria-current is what tells a screen reader which service this is; the
+  // underline in the masthead is the same fact drawn for everyone else.
+  $$('[data-nav] a').forEach((link) => {
+    if (new URL(link.href, location.href).pathname === location.pathname) {
+      link.setAttribute('aria-current', 'page');
+    }
+  });
 
   try {
     const { user } = await api('/api/auth/me');

@@ -77,8 +77,8 @@ form.addEventListener('submit', async (event) => {
     } else {
       faceNotice.className = 'notice notice--warn';
       faceNotice.innerHTML =
-        '<span>No face is on file for this voter ID, so <strong>no camera check will run</strong>. ' +
-        '<a href="/enrol-face">Enrol a face</a> to require one.</span>';
+        '<span>No reference photograph is on file for this voter ID, so ' +
+        '<strong>no camera check will run</strong>. Raise a ticket if you expected one.</span>';
       faceNotice.hidden = false;
     }
 
@@ -116,7 +116,7 @@ toBallot.addEventListener('click', async () => {
           <h3 style="font-size:15.5px">${escapeHtml(candidate.name)}</h3>
           <p>${escapeHtml(candidate.party)}${candidate.symbol ? ` &middot; ${escapeHtml(candidate.symbol)}` : ''}</p>
         </span>
-        <input type="radio" name="candidate" value="${escapeHtml(candidate.id)}" style="width:20px;height:20px;accent-color:var(--violet)">
+        <input type="radio" name="candidate" value="${escapeHtml(candidate.id)}" style="width:20px;height:20px;accent-color:var(--ink-violet)">
       </label>`).join('');
 
     credsDialog.close();

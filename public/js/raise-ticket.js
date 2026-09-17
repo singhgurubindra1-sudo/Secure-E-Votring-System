@@ -144,7 +144,7 @@ async function loadMine() {
     mineBody.innerHTML = tickets.slice(0, 5).map((ticket) => `
       <div style="display:flex;gap:14px;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line-soft)">
         <div style="min-width:0">
-          <div style="font-family:var(--mono);font-size:13px;color:var(--violet)">${escapeHtml(ticket.reference)}</div>
+          <div style="font-family:var(--mono);font-size:13px;color:var(--gov)">${escapeHtml(ticket.reference)}</div>
           <div style="font-size:13.5px;color:var(--muted);margin-top:2px">${escapeHtml(ticket.issue)}${ticket.issue.length >= 160 ? '…' : ''}</div>
         </div>
         <span class="pill pill--good" style="flex:none">${escapeHtml(ticket.status)}</span>

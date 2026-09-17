@@ -9,42 +9,96 @@
 <link rel="icon" href="data:,">
 </head>
 <body>
-<canvas id="forest" aria-hidden="true"></canvas>
+<canvas id="backdrop" aria-hidden="true"></canvas>
+<a class="skip" href="#signin-panel">Skip to sign in</a>
+
+<div class="govbar govbar--dark">
+  <details class="govbar__wrap">
+    <summary class="govbar__bar">
+      <span class="govbar__tri" aria-hidden="true"></span>
+      <span class="govbar__text">A demonstration electoral services portal, built for academic review</span>
+      <span class="govbar__cue">Here&rsquo;s how you can tell</span>
+    </summary>
+    <div class="govbar__panel">
+      <div>
+        <b>This is not a live election service</b>
+        <p>The electoral roll, the candidates and the ballots are sample data held on this
+        server. No ballot cast here is reported to any election authority.</p>
+      </div>
+      <div>
+        <b>A secure session, even so</b>
+        <p>Sign-in is signed and time-limited, the session cookie is HTTP-only and
+        same-site, and a sealed ballot is stored with no link back to the voter who cast it.</p>
+      </div>
+    </div>
+  </details>
+</div>
+
 <main class="split">
 
   <section class="split__brand">
-    <a class="mark" href="/">
-      <span class="mark__glyph" aria-hidden="true"></span>
-      <span class="mark__text">Secure E-Voting<span>Electoral services portal</span></span>
+    <a class="seal seal--light" href="/">
+      <span class="seal__emblem" aria-hidden="true">
+        <svg class="chakra" width="32" height="32" viewBox="0 0 48 48" fill="none" stroke="currentColor" aria-hidden="true">
+          <circle cx="24" cy="24" r="20" stroke-width="2.4"/>
+          <g stroke-width="1.15">
+            <line x1="24" y1="4" x2="24" y2="44"/>
+            <line x1="24" y1="4" x2="24" y2="44" transform="rotate(15 24 24)"/>
+            <line x1="24" y1="4" x2="24" y2="44" transform="rotate(30 24 24)"/>
+            <line x1="24" y1="4" x2="24" y2="44" transform="rotate(45 24 24)"/>
+            <line x1="24" y1="4" x2="24" y2="44" transform="rotate(60 24 24)"/>
+            <line x1="24" y1="4" x2="24" y2="44" transform="rotate(75 24 24)"/>
+            <line x1="24" y1="4" x2="24" y2="44" transform="rotate(90 24 24)"/>
+            <line x1="24" y1="4" x2="24" y2="44" transform="rotate(105 24 24)"/>
+            <line x1="24" y1="4" x2="24" y2="44" transform="rotate(120 24 24)"/>
+            <line x1="24" y1="4" x2="24" y2="44" transform="rotate(135 24 24)"/>
+            <line x1="24" y1="4" x2="24" y2="44" transform="rotate(150 24 24)"/>
+            <line x1="24" y1="4" x2="24" y2="44" transform="rotate(165 24 24)"/>
+          </g>
+          <circle cx="24" cy="24" r="3.1" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <span class="seal__text">
+        <b>Secure E-Voting</b>
+        <span>Office of Electoral Services</span>
+      </span>
     </a>
 
-    <svg class="thumbmark" viewBox="0 0 200 200" fill="none" aria-hidden="true">
-      <g stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-        <path d="M100 24c-32 0-58 26-58 58v28c0 12-3 23-9 33"/>
-        <path d="M100 42c-22 0-40 18-40 40v30c0 14-4 27-11 38"/>
-        <path d="M100 60c-12 0-22 10-22 22v34c0 16-5 31-14 44"/>
-        <path d="M100 78c-3 0-4 2-4 4v38c0 18-6 35-17 49"/>
-        <path d="M100 24c32 0 58 26 58 58v20"/>
-        <path d="M100 42c22 0 40 18 40 40v26c0 10 2 20 5 29"/>
-        <path d="M100 60c12 0 22 10 22 22v30c0 14 3 27 9 39"/>
-        <path d="M100 78c3 0 4 2 4 4v34c0 16 4 31 11 45"/>
-      </g>
-    </svg>
-
     <div class="split__lead">
-      <h1>Your vote, verified end to end.</h1>
-      <p>Check your entry on the roll, print your voter card and cast a single sealed ballot — all from one account.</p>
+      <h1>One man, one vote,<br>one value.</h1>
+      <p>
+        Check your entry on the electoral roll, download your voter card and cast a
+        single sealed ballot &mdash; all from one account.
+      </p>
     </div>
 
-    <div class="split__facts">
-      <div><b>One ballot</b><span>Each voter ID can be used exactly once.</span></div>
-      <div><b>No link stored</b><span>Your identity is never saved alongside your choice.</span></div>
-      <div><b>Signed session</b><span>Sessions expire automatically after 8 hours.</span></div>
-    </div>
+    <!-- Names the figure standing in the hall behind this panel, so the
+         monument is attributed rather than left as decoration. -->
+    <figure class="tribute">
+      <figcaption>
+        <b>Dr. B. R. Ambedkar</b>
+        <span>
+          Chair of the drafting committee of the Constitution of India, who carried
+          universal adult suffrage into Article 326 &mdash; one vote for every adult
+          citizen, of equal weight, from the first general election onward.
+        </span>
+      </figcaption>
+    </figure>
+
+    <ul class="split__facts">
+      <li><b>One ballot</b><span>Each voter ID can be used exactly once.</span></li>
+      <li><b>No link stored</b><span>Your identity is never saved alongside your choice.</span></li>
+      <li><b>Signed session</b><span>Sessions expire automatically after 8 hours.</span></li>
+    </ul>
   </section>
 
   <section class="split__form">
-    <div>
+    <div class="authcard" id="signin-panel">
+      <div class="authcard__head">
+        <span class="authcard__badge">Secure sign-in</span>
+        <p>Access to the electoral services portal</p>
+      </div>
+
       <div class="tabs" role="tablist" aria-label="Account">
         <button type="button" role="tab" id="tab-signin" aria-selected="true" aria-controls="panel-signin">Sign in</button>
         <button type="button" role="tab" id="tab-register" aria-selected="false" aria-controls="panel-register">Create account</button>
@@ -52,8 +106,8 @@
 
       <!-- Sign in -->
       <form id="panel-signin" role="tabpanel" aria-labelledby="tab-signin" novalidate>
-        <h2 style="font-size:22px;margin-bottom:6px">Sign in</h2>
-        <p style="color:var(--muted);font-size:13.5px;margin-bottom:22px">Use the email you registered with.</p>
+        <h2 class="authcard__title">Sign in</h2>
+        <p class="authcard__sub">Use the email you registered with.</p>
 
         <div class="field">
           <label for="si-email">Email address</label>
@@ -69,13 +123,13 @@
 
         <div class="notice notice--bad" data-form-error hidden></div>
 
-        <button class="btn btn--primary btn--block" type="submit" style="margin-top:6px">Sign in</button>
+        <button class="btn btn--primary btn--block" type="submit">Sign in</button>
       </form>
 
       <!-- Register -->
       <form id="panel-register" role="tabpanel" aria-labelledby="tab-register" novalidate hidden>
-        <h2 style="font-size:22px;margin-bottom:6px">Create account</h2>
-        <p style="color:var(--muted);font-size:13.5px;margin-bottom:22px">This account is for portal access. Your voter details stay on the electoral roll.</p>
+        <h2 class="authcard__title">Create account</h2>
+        <p class="authcard__sub">This account is for portal access. Your voter details stay on the electoral roll.</p>
 
         <div class="field">
           <label for="rg-name">Full name</label>
@@ -98,13 +152,19 @@
 
         <div class="notice notice--bad" data-form-error hidden></div>
 
-        <button class="btn btn--primary btn--block" type="submit" style="margin-top:6px">Create account</button>
+        <button class="btn btn--primary btn--block" type="submit">Create account</button>
       </form>
+
+      <p class="authcard__foot">
+        Protected by a signed, same-site session. Face verification runs before a
+        voter card or a ballot is released, where a photograph is held on file.
+      </p>
     </div>
   </section>
 
 </main>
+
 <script type="module" src="/js/signin.js"></script>
-<script type="module" src="/js/forest-mount.js"></script>
+<script type="module" src="/js/scene-mount.js"></script>
 </body>
 </html>
