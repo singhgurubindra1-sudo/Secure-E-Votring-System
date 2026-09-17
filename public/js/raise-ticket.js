@@ -94,12 +94,27 @@ filelist.addEventListener('click', (event) => {
 
 issue.addEventListener('input', () => { issueCount.textContent = issue.value.length; });
 
+/**
+ * form.reset() clears the controls asynchronously, so this cleanup is deferred
+ * to a timer to run after the browser has actually done it.
+ *
+ * That timer is why the success message used to vanish. The submit handler
+ * calls form.reset() and then sets the message; the reset's deferred notify()
+ * landed afterwards and wiped it, so a ticket that saved perfectly well
+ * confirmed nothing at all. The success path now says explicitly that it wants
+ * its notice kept, rather than depending on which timer happens to run last.
+ */
+let keepNotice = false;
+
 form.addEventListener('reset', () => {
+  // Read the flag now, not inside the timer, so a second reset cannot race it.
+  const keep = keepNotice;
+  keepNotice = false;
   setTimeout(() => {
     chosen = [];
     renderFiles();
     clearFieldErrors(form);
-    notify();
+    if (!keep) notify();
     issueCount.textContent = '0';
   }, 0);
 });
@@ -121,6 +136,7 @@ form.addEventListener('submit', async (event) => {
 
   try {
     const result = await api('/api/tickets', { method: 'POST', body: data });
+    keepNotice = true;
     form.reset();
     chosen = [];
     renderFiles();
@@ -141,6 +157,7 @@ async function loadMine() {
     const { tickets } = await api('/api/tickets/mine');
     if (!tickets.length) { mine.hidden = true; return; }
 
+    mineBody.removeAttribute('style');
     mineBody.innerHTML = tickets.slice(0, 5).map((ticket) => `
       <div style="display:flex;gap:14px;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line-soft)">
         <div style="min-width:0">
@@ -150,8 +167,14 @@ async function loadMine() {
         <span class="pill pill--good" style="flex:none">${escapeHtml(ticket.status)}</span>
       </div>`).join('');
     mine.hidden = false;
-  } catch {
-    mine.hidden = true;
+  } catch (err) {
+    // Hiding the panel on failure is indistinguishable from having no tickets,
+    // which is the worst possible answer to "where did my ticket go".
+    mineBody.textContent = err.message
+      ? `Your tickets could not be loaded: ${err.message}`
+      : 'Your tickets could not be loaded. Reload the page to try again.';
+    mineBody.setAttribute('style', 'font-size:13.5px;color:var(--alert);padding:12px 0');
+    mine.hidden = false;
   }
 }
 
